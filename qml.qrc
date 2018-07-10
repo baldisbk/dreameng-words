@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>MainForm.ui.qml</file>
+        <file>WordForm.ui.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>FlipPage.qml</file>
+    </qresource>
+</RCC>
