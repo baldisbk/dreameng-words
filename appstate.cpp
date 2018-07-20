@@ -1,6 +1,11 @@
 #include "appstate.h"
 
-AppState::AppState(QObject *parent) : QObject(parent)
+#include <QRandomGenerator>
+
+#include <QDebug>
+
+AppState::AppState(QObject *parent) : QObject(parent),
+	m_upper(nullptr), m_lower(nullptr), m_left(nullptr), m_right(nullptr)
 {
 	m_page = new PageState(PageState::Main);
 	next(Nowhere);
@@ -8,18 +13,10 @@ AppState::AppState(QObject *parent) : QObject(parent)
 
 void AppState::next(Direction dir)
 {
-	// actions & stats
+	dump("Before next");
+
+	// actions & stats before
 	switch (page()->status()) {
-	case PageState::Header:
-		switch(((StatState*)page())->otherState()) {
-		case PageState::Learn: newLearn(); break;
-		case PageState::Check: newCheck(); break;
-		case PageState::Errors: newErrors(); break;
-		case PageState::Train: newTrain(); break;
-		case PageState::Repeat: newRepeat(); break;
-		default: break;
-		}
-		break;
 	case PageState::Learn:
 	case PageState::Check:
 	case PageState::Errors:
@@ -27,6 +24,9 @@ void AppState::next(Direction dir)
 	case PageState::Repeat:
 		if (dir == Right || dir == Left)
 			flipWord(dir == Right);
+		break;
+	case PageState::Header:
+		m_currentWord = 0;
 		break;
 	default:
 		break;
@@ -41,9 +41,26 @@ void AppState::next(Direction dir)
 	default: break;
 	}
 
+	// actions & stats after
+	switch (page()->status()) {
+	case PageState::Header:
+		switch(((StatState*)page())->otherState()) {
+		case PageState::Learn: newLearn(); break;
+		case PageState::Check: newCheck(); break;
+		case PageState::Errors: newErrors(); break;
+		case PageState::Train: newTrain(); break;
+		case PageState::Repeat: newRepeat(); break;
+		default: break;
+		}
+		break;
+	default:
+		break;
+	}
+
 	// next pages
 	auto status = page()->status();
 	auto next = nextWord();
+	qDebug() << "Next word:" << next.word;
 	switch (status) {
 	case PageState::Main:
 		setUpper(new StatState(PageState::Header, PageState::Repeat));
@@ -57,12 +74,14 @@ void AppState::next(Direction dir)
 		setLeft(new PageState(PageState::None));
 		setRight(new PageState(PageState::None));
 		break;
-	case PageState::Header:
+	case PageState::Header: {
+		auto othState = ((StatState*)page())->otherState();
 		setUpper(new PageState(PageState::Main));
 		setLower(new PageState(PageState::None));
-		setLeft(new WordState(((StatState*)page())->otherState(), next, true));
-		setRight(new WordState(((StatState*)page())->otherState(), next, true));
+		setLeft(new WordState(othState, next, !showWordOnState(othState)));
+		setRight(new WordState(othState, next, !showWordOnState(othState)));
 		break;
+	}
 	case PageState::Errors:
 	case PageState::Learn:
 	case PageState::Check:
@@ -83,7 +102,10 @@ void AppState::next(Direction dir)
 				setRight(new StatState(PageState::Header, PageState::Check));
 			} else if (m_errorWords.isEmpty()) {
 				// no errors - it's over
-				setLeft(new StatState(PageState::Header, PageState::Main));
+				if (page()->status() == PageState::Check)
+					setLeft(new StatState(PageState::Header, PageState::Errors));
+				else
+					setLeft(new StatState(PageState::Header, PageState::Main));
 				setRight(new StatState(PageState::Header, PageState::Main));
 			} else {
 				// had errors - fix 'em, bitch
@@ -98,6 +120,7 @@ void AppState::next(Direction dir)
 	default:
 		break;
 	}
+	dump("After next");
 }
 
 void AppState::addWord(QVariantMap word)
@@ -123,20 +146,20 @@ void AppState::populateDemo()
 	if (!m_words.contains(6)) m_words[6] = Word("Six", "Sest");
 	if (!m_words.contains(7)) m_words[7] = Word("Seven", "Sedm");
 	if (!m_words.contains(8)) m_words[8] = Word("Eight", "Osm");
-	if (!m_words.contains(9)) m_words[8] = Word("Nine", "Devet");
-	if (!m_words.contains(10)) m_words[8] = Word("Ten", "Deset");
-	if (!m_words.contains(11)) m_words[8] = Word("Eleven", "Jedenact");
-	if (!m_words.contains(12)) m_words[8] = Word("Twelve", "Dvanact");
-	if (!m_words.contains(13)) m_words[8] = Word("Thirteen", "Trinact");
-	if (!m_words.contains(14)) m_words[8] = Word("Fourteen", "Ctrnact");
-	if (!m_words.contains(15)) m_words[8] = Word("Fifteen", "Patnact");
-	if (!m_words.contains(16)) m_words[8] = Word("Sixteen", "Sesnact");
-	if (!m_words.contains(17)) m_words[8] = Word("Seventeen", "Sedmnact");
-	if (!m_words.contains(18)) m_words[8] = Word("Eighteen", "Osmnact");
-	if (!m_words.contains(19)) m_words[8] = Word("Nineteen", "Devetnact");
-	if (!m_words.contains(20)) m_words[8] = Word("Twenty", "Dvacet");
+	if (!m_words.contains(9)) m_words[9] = Word("Nine", "Devet");
+	if (!m_words.contains(10)) m_words[10] = Word("Ten", "Deset");
+	if (!m_words.contains(11)) m_words[11] = Word("Eleven", "Jedenact");
+	if (!m_words.contains(12)) m_words[12] = Word("Twelve", "Dvanact");
+	if (!m_words.contains(13)) m_words[13] = Word("Thirteen", "Trinact");
+	if (!m_words.contains(14)) m_words[14] = Word("Fourteen", "Ctrnact");
+	if (!m_words.contains(15)) m_words[15] = Word("Fifteen", "Patnact");
+	if (!m_words.contains(16)) m_words[16] = Word("Sixteen", "Sesnact");
+	if (!m_words.contains(17)) m_words[17] = Word("Seventeen", "Sedmnact");
+	if (!m_words.contains(18)) m_words[18] = Word("Eighteen", "Osmnact");
+	if (!m_words.contains(19)) m_words[19] = Word("Nineteen", "Devetnact");
+	if (!m_words.contains(20)) m_words[20] = Word("Twenty", "Dvacet");
 
-	m_settings.setSeqLength(10);
+	m_settings.setSeqLength(3);
 	m_settings.setSeqNumber(1);
 
 	m_page = new PageState(PageState::Main);
@@ -172,27 +195,27 @@ Settings *AppState::settings()
 	return &m_settings;
 }
 
-const PageState *AppState::upper() const
+PageState *AppState::upper() const
 {
 	return m_upper;
 }
 
-const PageState *AppState::lower() const
+PageState *AppState::lower() const
 {
 	return m_lower;
 }
 
-const PageState *AppState::left() const
+PageState *AppState::left() const
 {
 	return m_left;
 }
 
-const PageState *AppState::right() const
+PageState *AppState::right() const
 {
 	return m_right;
 }
 
-const PageState *AppState::page() const
+PageState *AppState::page() const
 {
 	return m_page;
 }
@@ -229,7 +252,7 @@ void AppState::flipWord(bool ok)
 	if (!ok) {
 		++w.errors;
 		if (m_page->status() == PageState::Check)
-			m_errorWords.push_back(m_currentWord);
+			m_errorWords.push_back(m_selectedWords[m_currentWord]);
 	}
 	m_changedWords[index] = w;
 	++m_currentWord;
@@ -250,14 +273,19 @@ Word AppState::curWord() const
 
 Word AppState::nextWord() const
 {
-	if (m_currentWord == -1)
+	if (m_currentWord == -1) {
+		qDebug() << "before start - return" << m_selectedWords[0];
 		return m_changedWords[m_selectedWords[0]];
-	else if (m_currentWord < m_selectedWords.size() - 1)
+	} else if (m_currentWord < m_selectedWords.size() - 1) {
+		qDebug() << "normal - return" << m_selectedWords[m_currentWord+1];
 		return m_changedWords[m_selectedWords[m_currentWord+1]];
-	else if (!m_errorWords.isEmpty())
+	} else if (!m_errorWords.isEmpty()) {
+		qDebug() << "after end - return error" << m_errorWords[0];
 		return m_changedWords[m_errorWords[0]];
-	else
+	} else {
+		qDebug() << "after end - return none";
 		return Word();
+	}
 }
 
 bool AppState::showWordOnState(PageState::State state)
@@ -271,6 +299,11 @@ bool AppState::canShowWordOnState(PageState::State state)
 	((state == PageState::Repeat) || (state == PageState::Train));
 }
 
+int rand(int size)
+{
+	return QRandomGenerator::global()->bounded(size);
+}
+
 void AppState::newLearn()
 {
 	m_selectedWords.clear();
@@ -278,15 +311,17 @@ void AppState::newLearn()
 	m_errorWords.clear();
 	// select new words
 	for (int i = 0; i < m_settings.seqLength(); ++i) {
-		int newId;
-		while (m_selectedWords.contains(newId=qrand()%m_words.size())) {}
+		int newId = rand(m_words.size());
+		for (; m_selectedWords.contains(newId); newId = rand(m_words.size())) {}
 		m_selectedWords.append(newId);
+		qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select new words
 	m_selectedWords = m_changedWords.keys().toVector();
-	m_currentWord = 0;
+	m_currentWord = -1;
 	shuffle();
+	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::newTrain()
@@ -296,15 +331,17 @@ void AppState::newTrain()
 	m_errorWords.clear();
 	// select words to train
 	for (int i = 0; i < m_settings.seqLength(); ++i) {
-		int newId;
-		while (m_selectedWords.contains(newId=qrand()%m_words.size())) {}
+		int newId = rand(m_words.size());
+		for (; m_selectedWords.contains(newId); newId = rand(m_words.size())) {}
 		m_selectedWords.append(newId);
+		qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select words to train
 	m_selectedWords = m_changedWords.keys().toVector();
-	m_currentWord = 0;
+	m_currentWord = -1;
 	shuffle();
+	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::newRepeat()
@@ -314,33 +351,51 @@ void AppState::newRepeat()
 	m_errorWords.clear();
 	// select old words
 	for (int i = 0; i < m_settings.seqLength(); ++i) {
-		int newId;
-		while (m_selectedWords.contains(newId=qrand()%m_words.size())) {}
+		int newId = rand(m_words.size());
+		for (; m_selectedWords.contains(newId); newId = rand(m_words.size())) {}
 		m_selectedWords.append(newId);
+		qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select old words
 	m_selectedWords = m_changedWords.keys().toVector();
-	m_currentWord = 0;
+	m_currentWord = -1;
 	shuffle();
+	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::newErrors()
 {
 	m_selectedWords = m_errorWords;
-	m_currentWord = 0;
+	m_errorWords.clear();
+	m_currentWord = -1;
 	shuffle();
+	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::newCheck()
 {
-	m_selectedWords = m_errorWords;
-	m_currentWord = 0;
+	m_currentWord = -1;
 	m_errorWords.clear();
 	shuffle();
+	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::shuffle()
 {
 	// shuffle
+}
+
+void AppState::dump(QString prefix)
+{
+	qDebug() << prefix;
+	qDebug() << "\tpage:" << page()->dump();
+	qDebug() << "\tleft:" << (left()?left()->dump():"null");
+	qDebug() << "\tright:" << (right()?right()->dump():"null");
+	qDebug() << "\tupper:" << (upper()?upper()->dump():"null");
+	qDebug() << "\tlower:" << (lower()?lower()->dump():"null");
+	qDebug() <<
+		QString("\tcurrent %1, all %2, selected %3, errors %4").
+		    arg(m_currentWord).arg(m_changedWords.size()).
+		    arg(m_selectedWords.size()).arg(m_errorWords.size());
 }

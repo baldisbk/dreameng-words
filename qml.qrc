@@ -5,5 +5,6 @@
         <file>WordForm.ui.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>FlipPage.qml</file>
+        <file>HeaderForm.ui.qml</file>
     </qresource>
 </RCC>

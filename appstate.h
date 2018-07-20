@@ -19,14 +19,15 @@ public:
 		Left,
 		Right
 	};
+	Q_ENUM(Direction)
 
 	explicit AppState(QObject *parent = nullptr);
 
-	Q_PROPERTY(const PageState* upper READ upper)
-	Q_PROPERTY(const PageState* lower READ lower)
-	Q_PROPERTY(const PageState* left READ left)
-	Q_PROPERTY(const PageState* right READ right)
-	Q_PROPERTY(const PageState* page READ page)
+	Q_PROPERTY(PageState* upper READ upper)
+	Q_PROPERTY(PageState* lower READ lower)
+	Q_PROPERTY(PageState* left READ left)
+	Q_PROPERTY(PageState* right READ right)
+	Q_PROPERTY(PageState* page READ page)
 
 	Q_PROPERTY(Settings* settings READ settings CONSTANT)
 
@@ -44,11 +45,11 @@ public:
 
 	Settings* settings();
 
-	const PageState* upper() const;
-	const PageState* lower() const;
-	const PageState* left() const;
-	const PageState* right() const;
-	const PageState* page() const;
+	PageState* upper() const;
+	PageState* lower() const;
+	PageState* left() const;
+	PageState* right() const;
+	PageState *page() const;
 
 public slots:
 	void setUpper(PageState *upper);
@@ -74,6 +75,8 @@ private:
 	void newCheck();
 
 	void shuffle();
+
+	void dump(QString prefix);
 
 	QMap<int, Word> m_words;
 

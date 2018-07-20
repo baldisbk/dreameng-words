@@ -1,39 +1,49 @@
 import QtQuick 2.8
 import QtQuick.Controls 2.1
 
-Page {
-	id: page
-    width: 600
-    height: 400
-
-    header: Label {
-	    text: qsTr("Main Menu")
-	    font.pixelSize: Qt.application.font.pixelSize * 2
-	    padding: 10
-    }
+Item {
+    id: page
+    property int s: width > height ? height : width
+    property double coeff: 1.5
 
     Rectangle {
 	    id: rectangle
-	    x: 242
-	    width: 100
-	    height: 100
-	    color: "#0000ff"
-	    anchors.horizontalCenter: parent.horizontalCenter
-	    anchors.top: parent.top
-	    anchors.topMargin: 2
-	    rotation: 45
-    }
-
-    Rectangle {
-	    id: rectangle1
-	x: 172
-	y: 219
-	width: 100
-	height: 100
-	color: "#ff0000"
-	rotation: 45
+	width: s / coeff
+	height: s / coeff
+	anchors.verticalCenter: parent.verticalCenter
 	anchors.horizontalCenter: parent.horizontalCenter
-	anchors.bottom: parent.bottom
- anchors.bottomMargin: 30
+	rotation: 45
+	Rectangle {
+		id: topR
+	    width: parent.width / 2
+	    height: parent.height / 2
+	    color: "#0000ff"
+	    anchors.top: parent.top
+	    anchors.left: parent.left
+	}
+	Rectangle {
+		id: leftR
+	    width: parent.width / 2
+	    height: parent.height / 2
+	    color: "#ff0000"
+	    anchors.bottom: parent.bottom
+	    anchors.left: parent.left
+	}
+	Rectangle {
+		id: bottomR
+	    width: parent.width / 2
+	    height: parent.height / 2
+	    color: "#ffff00"
+	    anchors.bottom: parent.bottom
+	    anchors.right: parent.right
+	}
+	Rectangle {
+		id: rightR
+	    width: parent.width / 2
+	    height: parent.height / 2
+	    color: "#00ff00"
+	    anchors.top: parent.top
+	    anchors.right: parent.right
+	}
     }
 }

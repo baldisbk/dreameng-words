@@ -25,11 +25,15 @@ public:
 	};
 	Q_ENUM(State)
 
+	static QString stateToString(State state);
+
 	explicit PageState(QObject *parent = nullptr) : QObject(parent) {}
 	PageState(State state, QObject *parent = nullptr);
 
 	Q_PROPERTY(State status READ status WRITE setStatus NOTIFY statusChanged)
 	State status() const;
+
+	virtual QString dump() const;
 
 signals:
 	void statusChanged(State status);
@@ -56,6 +60,8 @@ public:
 	QString translation() const;
 	bool wordOnly() const;
 
+	virtual QString dump() const override;
+
 signals:
 	void wordChanged(QString word);
 	void translationChanged(QString translation);
@@ -81,6 +87,8 @@ public:
 
 	Q_PROPERTY(State otherState READ otherState WRITE setOtherState NOTIFY otherStateChanged)
 	State otherState() const;
+
+	virtual QString dump() const override;
 
 signals:
 	void otherStateChanged(State otherState);

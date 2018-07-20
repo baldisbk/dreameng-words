@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import AppState 1.0
 
 Item {
 	property Item page
@@ -6,6 +7,8 @@ Item {
 	property Item lefter
 	property Item righter
 	property Item lower
+	property int dir: AppState.Nowhere
+
 	Flipable {
 		id: flipable
 		anchors.fill: parent
@@ -33,12 +36,6 @@ Item {
 		}
 	}
 
-	property int dir: 0
-	// 0 - init
-	// 1 - left
-	// 2 - top
-	// 3 - right
-	// 4 - bottom
 	Connections {
 		target: na
 		onRunningChanged: {
@@ -48,19 +45,19 @@ Item {
 			rotbeh.enabled = false
 			page.visible = false
 			switch (dir) {
-			case 1:
+			case AppState.Left:
 				lefter.parent = frontside
 				page = lefter
 				break
-			case 2:
+			case AppState.Up:
 				upper.parent = frontside
 				page = upper
 				break
-			case 3:
+			case AppState.Right:
 				righter.parent = frontside
 				page = righter
 				break
-			case 4:
+			case AppState.Down:
 				lower.parent = frontside
 				page = lower
 				break
@@ -77,14 +74,17 @@ Item {
 		property int pressY
 		property int angle
 		property int axis: 0
+
 		anchors.fill: parent
+
+		function max(x,y) {return (x>y)?x:y}
+		function abs(x) {return max(x, -x)}
+
 		onPressed: {
 			pressX = mouse.x
 			pressY = mouse.y
 			angle = rotation.angle
 		}
-		function max(x,y) {return (x>y)?x:y}
-		function abs(x) {return max(x, -x)}
 
 		onPositionChanged: {
 			var diffX = pressX - mouse.x
@@ -114,37 +114,44 @@ Item {
 			if (axis == 0) {
 				return
 			}
-			if (abs(rotation.angle)<45)
+			if (abs(rotation.angle)<30)
 				rotation.angle = 0
 			else if (rotation.angle>0) {
 				rotation.angle = 180
 				if (axis<0) {
 					lefter.parent = backside
 					lefter.visible = true
-					parent.dir = 1
+					parent.dir = AppState.Left
 				} else {
 					lower.parent = backside
 					lower.visible = true
-					parent.dir = 4
+					parent.dir = AppState.Down
 				}
 			} else {
 				rotation.angle = -180
 				if (axis<0) {
 					righter.parent = backside
 					righter.visible = true
-					parent.dir = 3
+					parent.dir = AppState.Right
 				} else {
 					upper.parent = backside
 					upper.visible = true
-					parent.dir = 2
+					parent.dir = AppState.Up
 				}
 			}
 			axis = 0
 		}
 	}
-	Component.onCompleted: {
-		done(0)
-		page.parent = frontside
-	}
 	signal done(int dir)
+
+	function init(c, l, r, t, b) {
+		page = c
+		lefter = l
+		righter = r
+		upper = t
+		lower = b
+
+		page.parent = frontside
+		page.visible = true
+	}
 }
