@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import AppState 1.0
+import QtGraphicalEffects 1.0
 
 Item {
 	property Item page
@@ -8,6 +9,10 @@ Item {
 	property Item righter
 	property Item lower
 	property int dir: AppState.Nowhere
+
+	function max(x,y) {return (x>y)?x:y}
+	function abs(x) {return max(x, -x)}
+	function sign(x) {return x>0?1:(x<0?-1:0)}
 
 	Flipable {
 		id: flipable
@@ -34,6 +39,22 @@ Item {
 				}
 			}
 		}
+	}
+
+	RadialGradient {
+		id: sideGrad
+		property color light: "blue"
+		property double tilt: (90 - abs(abs(rotation.angle) - 90))/90
+		anchors.fill: parent
+		horizontalOffset: rotation.axis.y * width / 2 * sign(-rotation.angle)
+		verticalOffset: rotation.axis.x * height / 2 * sign(rotation.angle)
+		horizontalRadius: width / 2 * (rotation.axis.x != 0 ? 1 : tilt)
+		verticalRadius: height / 2 * (rotation.axis.y != 0 ? 1 : tilt)
+		gradient: Gradient {
+			GradientStop { position: 1.0; color: "#00000000" }
+			GradientStop { position: 0.0; color: sideGrad.light }
+		}
+		opacity: tilt
 	}
 
 	Connections {
@@ -76,9 +97,6 @@ Item {
 		property int axis: 0
 
 		anchors.fill: parent
-
-		function max(x,y) {return (x>y)?x:y}
-		function abs(x) {return max(x, -x)}
 
 		onPressed: {
 			pressX = mouse.x
