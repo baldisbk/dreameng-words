@@ -11,8 +11,8 @@ class PageState : public QObject
 public:	
 	enum State {
 		None = 0,
-		Main = None,	// for now they're equal
 		Ask = None,	// for now they're equal
+		Main,
 		Menu,
 
 		Header,

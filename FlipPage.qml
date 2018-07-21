@@ -8,6 +8,12 @@ Item {
 	property Item lefter
 	property Item righter
 	property Item lower
+
+	property bool noUpper
+	property bool noLefter
+	property bool noRighter
+	property bool noLower
+
 	property int dir: AppState.Nowhere
 
 	function max(x,y) {return (x>y)?x:y}
@@ -135,26 +141,44 @@ Item {
 			if (abs(rotation.angle)<30)
 				rotation.angle = 0
 			else if (rotation.angle>0) {
-				rotation.angle = 180
 				if (axis<0) {
-					lefter.parent = backside
-					lefter.visible = true
-					parent.dir = AppState.Left
+					if (noLefter) {
+						rotation.angle = 0
+					} else {
+						rotation.angle = 180
+						lefter.parent = backside
+						lefter.visible = true
+						parent.dir = AppState.Left
+					}
 				} else {
-					lower.parent = backside
-					lower.visible = true
-					parent.dir = AppState.Down
+					if (noLower) {
+						rotation.angle = 0
+					} else {
+						rotation.angle = 180
+						lower.parent = backside
+						lower.visible = true
+						parent.dir = AppState.Down
+					}
 				}
 			} else {
-				rotation.angle = -180
 				if (axis<0) {
-					righter.parent = backside
-					righter.visible = true
-					parent.dir = AppState.Right
+					if (noRighter) {
+						rotation.angle = 0
+					} else {
+						rotation.angle = -180
+						righter.parent = backside
+						righter.visible = true
+						parent.dir = AppState.Right
+					}
 				} else {
-					upper.parent = backside
-					upper.visible = true
-					parent.dir = AppState.Up
+					if (noUpper) {
+						rotation.angle = 0
+					} else {
+						rotation.angle = -180
+						upper.parent = backside
+						upper.visible = true
+						parent.dir = AppState.Up
+					}
 				}
 			}
 			axis = 0

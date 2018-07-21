@@ -44,6 +44,8 @@ ApplicationWindow {
 			//console.log("create menu")
 			obj = menuFact.createObject(flip, {"anchors.fill": flip, "visible": false})
 			break
+		case PageState.None:
+			// fallthrough
 		default:
 			// this should never occur
 			obj = Qt.createQmlObject(
@@ -119,22 +121,19 @@ ApplicationWindow {
 
 			appState.next(dir)
 			fillPage(appState.page, page)
-			//console.log("make lefter")
 			lefter = makePage(appState.left)
-			//console.log("make righter")
+			noLefter = appState.left.status == PageState.None
 			righter = makePage(appState.right)
-			//console.log("make upper")
+			noRighter = appState.right.status == PageState.None
 			upper = makePage(appState.upper)
-			//console.log("make lower")
+			noUpper = appState.upper.status == PageState.None
 			lower = makePage(appState.lower)
-			console.log("====")
+			noLower = appState.lower.status == PageState.None
 		}
 	}
 
 	Component.onCompleted: {
-		//console.log("ctor")
 		appState.populateDemo()
-
 		flip.init(
 			makePage(appState.page),
 			makePage(appState.left),
@@ -142,6 +141,5 @@ ApplicationWindow {
 			makePage(appState.upper),
 			makePage(appState.lower)
 		)
-		console.log("====")
 	}
 }
