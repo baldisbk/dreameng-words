@@ -60,7 +60,7 @@ void AppState::next(Direction dir)
 	// next pages
 	auto status = page()->status();
 	auto next = nextWord();
-	qDebug() << "Next word:" << next.word;
+	//qDebug() << "Next word:" << next.word;
 	switch (status) {
 	case PageState::Main:
 		setUpper(new StatState(PageState::Header, PageState::Repeat));
@@ -274,16 +274,12 @@ Word AppState::curWord() const
 Word AppState::nextWord() const
 {
 	if (m_currentWord == -1) {
-		qDebug() << "before start - return" << m_selectedWords[0];
 		return m_changedWords[m_selectedWords[0]];
 	} else if (m_currentWord < m_selectedWords.size() - 1) {
-		qDebug() << "normal - return" << m_selectedWords[m_currentWord+1];
 		return m_changedWords[m_selectedWords[m_currentWord+1]];
 	} else if (!m_errorWords.isEmpty()) {
-		qDebug() << "after end - return error" << m_errorWords[0];
 		return m_changedWords[m_errorWords[0]];
 	} else {
-		qDebug() << "after end - return none";
 		return Word();
 	}
 }
@@ -321,7 +317,6 @@ void AppState::newLearn()
 	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
 	shuffle();
-	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::newTrain()
@@ -341,7 +336,6 @@ void AppState::newTrain()
 	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
 	shuffle();
-	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::newRepeat()
@@ -361,7 +355,6 @@ void AppState::newRepeat()
 	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
 	shuffle();
-	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::newErrors()
@@ -370,7 +363,6 @@ void AppState::newErrors()
 	m_errorWords.clear();
 	m_currentWord = -1;
 	shuffle();
-	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::newCheck()
@@ -378,7 +370,6 @@ void AppState::newCheck()
 	m_currentWord = -1;
 	m_errorWords.clear();
 	shuffle();
-	qDebug() << "\t\ttotal words:" << m_selectedWords;
 }
 
 void AppState::shuffle()
@@ -388,6 +379,7 @@ void AppState::shuffle()
 
 void AppState::dump(QString prefix)
 {
+	return;
 	qDebug() << prefix;
 	qDebug() << "\tpage:" << page()->dump();
 	qDebug() << "\tleft:" << (left()?left()->dump():"null");

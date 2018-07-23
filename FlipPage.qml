@@ -115,6 +115,7 @@ Item {
 		property int axis: 0
 
 		anchors.fill: parent
+		propagateComposedEvents: true
 
 		onPressed: {
 			pressX = mouse.x

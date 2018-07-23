@@ -19,7 +19,7 @@ ApplicationWindow {
 	property Component mainFact: Qt.createComponent("MainForm.ui.qml")
 	property Component wordFact: Qt.createComponent("WordForm.ui.qml")
 	property Component headFact: Qt.createComponent("HeaderForm.ui.qml")
-	property Component menuFact: Qt.createComponent("MainForm.ui.qml")	//TODO
+	property Component menuFact: Qt.createComponent("Menu.qml")
 
 	function makePage(state){
 		var obj

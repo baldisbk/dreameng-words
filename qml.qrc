@@ -6,5 +6,6 @@
         <file>qtquickcontrols2.conf</file>
         <file>FlipPage.qml</file>
         <file>HeaderForm.ui.qml</file>
+        <file>Menu.qml</file>
     </qresource>
 </RCC>
