@@ -105,6 +105,44 @@ ApplicationWindow {
 		}
 	}
 
+	function flipColor(stateFrom, stateTo, dir) {
+		if (stateTo.status === PageState.None)
+			return "#00000000";
+		switch (stateFrom.status) {
+		case PageState.Main:
+		case PageState.Check:
+		case PageState.Repeat:
+		case PageState.Train:
+			switch(dir) {
+			case AppState.Up: return "blue"
+			case AppState.Down: return "yellow"
+			case AppState.Left: return "red"
+			case AppState.Right: return "#00ff00"
+			default: break
+			}
+			break;
+		case PageState.Menu:
+			switch(dir) {
+			case AppState.Up: return "blue"
+			default: break
+			}
+			break;
+		case PageState.Header:
+		case PageState.Learn:
+		case PageState.Errors:
+			switch(dir) {
+			case AppState.Up: return "blue"
+			case AppState.Down: return "yellow"
+			case AppState.Left: return "#00ff00"
+			case AppState.Right: return "#00ff00"
+			default: break
+			}
+			break;
+		default: break
+		}
+		return "#00000000"
+	}
+
 	FlipPage {
 		anchors.fill: parent
 		id: flip
@@ -123,12 +161,16 @@ ApplicationWindow {
 			fillPage(appState.page, page)
 			lefter = makePage(appState.left)
 			noLefter = appState.left.status == PageState.None
+			leftColor = flipColor(appState.page, appState.left, AppState.Left)
 			righter = makePage(appState.right)
 			noRighter = appState.right.status == PageState.None
+			rightColor = flipColor(appState.page, appState.right, AppState.Right)
 			upper = makePage(appState.upper)
 			noUpper = appState.upper.status == PageState.None
+			upperColor = flipColor(appState.page, appState.upper, AppState.Up)
 			lower = makePage(appState.lower)
 			noLower = appState.lower.status == PageState.None
+			lowerColor = flipColor(appState.page, appState.lower, AppState.Down)
 		}
 	}
 
@@ -141,5 +183,9 @@ ApplicationWindow {
 			makePage(appState.upper),
 			makePage(appState.lower)
 		)
+		flip.leftColor = flipColor(appState.page, appState.left, AppState.Left)
+		flip.rightColor = flipColor(appState.page, appState.right, AppState.Right)
+		flip.upperColor = flipColor(appState.page, appState.upper, AppState.Up)
+		flip.lowerColor = flipColor(appState.page, appState.lower, AppState.Down)
 	}
 }

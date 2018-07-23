@@ -14,6 +14,11 @@ Item {
 	property bool noRighter
 	property bool noLower
 
+	property color leftColor: "red"
+	property color rightColor: "#00ff00"
+	property color upperColor: "blue"
+	property color lowerColor: "yellow"
+
 	property int dir: AppState.Nowhere
 
 	function max(x,y) {return (x>y)?x:y}
@@ -49,13 +54,20 @@ Item {
 
 	RadialGradient {
 		id: sideGrad
-		property color light: "blue"
+		property color light:
+		    rotation.axis.x == 0 ? (
+			sign(rotation.angle) === 1 ?
+			    leftColor :
+			    rightColor): (
+			sign(-rotation.angle) === 1 ?
+			    upperColor :
+			    lowerColor)
 		property double tilt: (90 - abs(abs(rotation.angle) - 90))/90
 		anchors.fill: parent
 		horizontalOffset: rotation.axis.y * width / 2 * sign(-rotation.angle)
 		verticalOffset: rotation.axis.x * height / 2 * sign(rotation.angle)
-		horizontalRadius: width / 2 * (rotation.axis.x != 0 ? 1 : tilt)
-		verticalRadius: height / 2 * (rotation.axis.y != 0 ? 1 : tilt)
+		horizontalRadius: width / 2 * (rotation.axis.x + tilt)
+		verticalRadius: height / 2 * (rotation.axis.y + tilt)
 		gradient: Gradient {
 			GradientStop { position: 1.0; color: "#00000000" }
 			GradientStop { position: 0.0; color: sideGrad.light }
@@ -124,10 +136,15 @@ Item {
 				}
 			}
 			rotbeh.enabled = false
+			var maxfraq = 90
 			if (axis>0) {
-				fraq = 90*diffY/height
+				if ((diffY > 0 && noLower) || (diffY < 0 && noUpper))
+					maxfraq = 40
+				fraq = maxfraq*diffY/height
 			}else{
-				fraq = -90*diffX/width
+				if ((diffX > 0 && noRighter) || (diffX < 0 && noLefter))
+					maxfraq = 40
+				fraq = -maxfraq*diffX/width
 			}
 			rotation.axis.x = (axis>0)?1:0
 			rotation.axis.y = (axis<0)?1:0

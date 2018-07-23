@@ -17,7 +17,7 @@ Item {
 		id: topR
 	    width: parent.width / 2
 	    height: parent.height / 2
-	    color: "#0000ff"
+	    color: "blue"
 	    anchors.top: parent.top
 	    anchors.left: parent.left
 	}
