@@ -16,6 +16,19 @@ QString PageState::stateToString(PageState::State state)
 	}
 }
 
+PageState::State PageState::stringToState(QString str)
+{
+	if (str == "Main") return Main;
+	if (str == "Menu") return Menu;
+	if (str == "Header") return Header;
+	if (str == "Learn") return Learn;
+	if (str == "Check") return Check;
+	if (str == "Errors") return Errors;
+	if (str == "Train") return Train;
+	if (str == "Repeat") return Repeat;
+	return None;
+}
+
 PageState::PageState(PageState::State state, QObject *parent) :
 	QObject(parent), m_status(state)
 {}
@@ -25,6 +38,16 @@ PageState::State PageState::status() const {return m_status;}
 QString PageState::dump() const
 {
 	return stateToString(status());
+}
+
+QString PageState::store() const
+{
+	return stateToString(status());
+}
+
+void PageState::load(QString ctx)
+{
+	setStatus(stringToState(ctx));
 }
 
 void PageState::setStatus(State status)
@@ -104,4 +127,36 @@ QString StatState::dump() const
 	return QString("%1 => %2").
 		arg(PageState::dump()).
 		arg(stateToString(otherState()));
+}
+
+
+QString StatState::store() const
+{
+	return PageState::store()+";"+stateToString(otherState());
+}
+
+void StatState::load(QString ctx)
+{
+	QStringList strs = ctx.split(";");
+	if (strs.size() != 2) return;
+	PageState::load(strs[0]);
+	setOtherState(stringToState(strs[1]));
+}
+
+QString WordState::store() const
+{
+	return PageState::store()+";"+
+		word()+";"+
+		translation()+";"+
+		(wordOnly()?"0":"w");
+}
+
+void WordState::load(QString ctx)
+{
+	QStringList strs = ctx.split(";");
+	if (strs.size() != 4) return;
+	PageState::load(strs[0]);
+	setWord(strs[1]);
+	setTranslation(strs[2]);
+	setWordOnly(strs[3]=="0");
 }

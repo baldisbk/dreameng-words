@@ -7,5 +7,6 @@
         <file>FlipPage.qml</file>
         <file>HeaderForm.ui.qml</file>
         <file>Menu.qml</file>
+        <file>Database.qml</file>
     </qresource>
 </RCC>

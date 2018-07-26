@@ -4,11 +4,24 @@
 
 #include <QDebug>
 
-AppState::AppState(QObject *parent) : QObject(parent),
-	m_upper(nullptr), m_lower(nullptr), m_left(nullptr), m_right(nullptr)
+QString listToString(QVector<int> list)
 {
-	m_page = new PageState(PageState::Main);
-	next(Nowhere);
+	QStringList res;
+	foreach (auto i, list) res.append(QString::number(i));
+	return res.isEmpty()?" ":res.join(" ");
+}
+
+QVector<int> stringToList(QString str)
+{
+	QStringList strs = str.split(" ");
+	QVector<int> res;
+	foreach (auto i, strs) if (!i.isEmpty()) res.append(i.toInt());
+	return res;
+}
+
+AppState::AppState(QObject *parent) : QObject(parent),
+	m_upper(nullptr), m_lower(nullptr), m_left(nullptr), m_right(nullptr), m_page(nullptr)
+{
 }
 
 void AppState::next(Direction dir)
@@ -26,7 +39,8 @@ void AppState::next(Direction dir)
 			flipWord(dir == Right);
 		break;
 	case PageState::Header:
-		m_currentWord = 0;
+		if (dir != Nowhere)
+			m_currentWord = 0;
 		break;
 	default:
 		break;
@@ -44,12 +58,14 @@ void AppState::next(Direction dir)
 	// actions & stats after
 	switch (page()->status()) {
 	case PageState::Header:
-		switch(((StatState*)page())->otherState()) {
+		if (dir == Nowhere) break;
+		switch(static_cast<StatState*>(page())->otherState()) {
 		case PageState::Learn: newLearn(); break;
 		case PageState::Check: newCheck(); break;
 		case PageState::Errors: newErrors(); break;
 		case PageState::Train: newTrain(); break;
 		case PageState::Repeat: newRepeat(); break;
+		case PageState::Main: finish(); break;
 		default: break;
 		}
 		break;
@@ -75,11 +91,16 @@ void AppState::next(Direction dir)
 		setRight(new PageState(PageState::None));
 		break;
 	case PageState::Header: {
-		auto othState = ((StatState*)page())->otherState();
+		auto othState = static_cast<StatState*>(page())->otherState();
 		setUpper(new PageState(PageState::Main));
 		setLower(new PageState(PageState::None));
-		setLeft(new WordState(othState, next, !showWordOnState(othState)));
-		setRight(new WordState(othState, next, !showWordOnState(othState)));
+		if (next.word.isEmpty()) {
+			setLeft(new PageState(othState));
+			setRight(new PageState(othState));
+		} else {
+			setLeft(new WordState(othState, next, !showWordOnState(othState)));
+			setRight(new WordState(othState, next, !showWordOnState(othState)));
+		}
 		break;
 	}
 	case PageState::Errors:
@@ -123,16 +144,52 @@ void AppState::next(Direction dir)
 	dump("After next");
 }
 
+void AppState::init()
+{
+	m_settings.setSeqLength(3);
+	m_settings.setSeqNumber(1);
+
+	m_page = new PageState(PageState::Main);
+	finish();
+	next(Nowhere);
+}
+
 void AppState::addWord(QVariantMap word)
 {
-	int id = word.value("_id").toInt();
+	int id = word.value("uid").toInt();
 	if (id == -1)
 		while (m_words.contains(++id)) {}
 	Word newWord;
-	newWord.errors = word.value("errors", 0).toInt();
-	newWord.repeats = word.value("repeats", 0).toInt();
-	newWord.translation = word.value("translation").toString();
-	newWord.word = word.value("word").toString();
+	newWord.load(word);
+}
+
+void AppState::loadState(QVariantMap state)
+{
+	m_settings.setSeqLength(3);
+	m_settings.setSeqNumber(1);
+
+	if (m_page!=nullptr) delete m_page;
+	switch (PageState::stringToState(state["state"].toString())) {
+	case PageState::Learn:
+	case PageState::Check:
+	case PageState::Errors:
+	case PageState::Train:
+	case PageState::Repeat:
+		m_page = new WordState();
+		break;
+	case PageState::Header:
+		m_page = new StatState();
+		break;
+	default:
+		m_page = new PageState();
+		break;
+	}
+	m_page->load(state["statectx"].toString());
+	m_selectedWords = stringToList(state["selected"].toString());
+	m_errorWords = stringToList(state["errors"].toString());
+	m_currentWord = state["current"].toInt();
+	foreach(int w, m_selectedWords) m_changedWords[w] = m_words[w];
+	next(Nowhere);
 }
 
 void AppState::populateDemo()
@@ -158,12 +215,6 @@ void AppState::populateDemo()
 	if (!m_words.contains(18)) m_words[18] = Word("Eighteen", "Osmnact");
 	if (!m_words.contains(19)) m_words[19] = Word("Nineteen", "Devetnact");
 	if (!m_words.contains(20)) m_words[20] = Word("Twenty", "Dvacet");
-
-	m_settings.setSeqLength(3);
-	m_settings.setSeqNumber(1);
-
-	m_page = new PageState(PageState::Main);
-	next(Nowhere);
 }
 
 void AppState::populateFile(QString /*filename*/)
@@ -181,13 +232,42 @@ QVariantMap AppState::wordContents(int index) const
 	if (!m_words.contains(index))
 		return QVariantMap();
 	const Word w = m_words[index];
-	QVariantMap res;
-	res["word"] = w.word;
-	res["translation"] = w.translation;
-	res["errors"] = w.errors;
-	res["repeats"] = w.repeats;
-	res["_id"] = index;
+	QVariantMap res = w.store();
+	res["uid"] = index;
 	return res;
+}
+
+QList<int> AppState::changedIndexes() const
+{
+	return m_selectedWords.toList();
+}
+
+QVariantMap AppState::changedContents(int index) const
+{
+	if (!m_changedWords.contains(index))
+		return QVariantMap();
+	const Word w = m_changedWords[index];
+	QVariantMap res = w.store();
+	res["uid"] = index;
+	return res;
+}
+
+QVariantMap AppState::stateContents() const
+{
+	QVariantMap res;
+	res["state"] = PageState::stateToString(page()->status());
+	res["statectx"] = page()->store();
+	res["selected"] = listToString(m_selectedWords);
+	res["errors"] = listToString(m_errorWords);
+	res["current"] = m_currentWord;
+	return res;
+}
+
+void AppState::clearWords()
+{
+	m_words.clear();
+	m_selectedWords.clear();
+	m_errorWords.clear();
 }
 
 Settings *AppState::settings()
@@ -273,12 +353,12 @@ Word AppState::curWord() const
 
 Word AppState::nextWord() const
 {
-	if (m_currentWord == -1) {
-		return m_changedWords[m_selectedWords[0]];
+	if (m_changedWords.isEmpty()) {
+		return Word();
 	} else if (m_currentWord < m_selectedWords.size() - 1) {
 		return m_changedWords[m_selectedWords[m_currentWord+1]];
-	} else if (!m_errorWords.isEmpty()) {
-		return m_changedWords[m_errorWords[0]];
+//	} else if (!m_errorWords.isEmpty()) {
+//		return m_changedWords[m_errorWords[0]];
 	} else {
 		return Word();
 	}
@@ -372,14 +452,24 @@ void AppState::newCheck()
 	shuffle();
 }
 
+void AppState::finish()
+{
+	for (auto wi = m_changedWords.begin(); wi != m_changedWords.end(); ++wi)
+		m_words[wi.key()] = wi.value();
+	m_selectedWords.clear();
+	m_changedWords.clear();
+	m_errorWords.clear();
+	m_currentWord = -1;
+}
+
 void AppState::shuffle()
 {
-	// shuffle
+	// shuffle m_selected
 }
 
 void AppState::dump(QString prefix)
 {
-	return;
+	//return;
 	qDebug() << prefix;
 	qDebug() << "\tpage:" << page()->dump();
 	qDebug() << "\tleft:" << (left()?left()->dump():"null");

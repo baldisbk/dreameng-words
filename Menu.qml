@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 Item {
+	property Database db
 	Rectangle{
 		id: first
 		height: parent.height/3
@@ -12,7 +13,7 @@ Item {
 		}
 		MouseArea {
 			anchors.fill: parent
-			onClicked: console.log("first click")
+			onClicked: db.dump()
 		}
 	}
 	Rectangle{
@@ -26,7 +27,7 @@ Item {
 		}
 		MouseArea {
 			anchors.fill: parent
-			onClicked: console.log("second click")
+			onClicked: db.saveState()
 		}
 	}
 	Rectangle{
@@ -40,7 +41,7 @@ Item {
 		}
 		MouseArea {
 			anchors.fill: parent
-			onClicked: console.log("third click")
+			onClicked: db.fromdemo()
 		}
 	}
 }

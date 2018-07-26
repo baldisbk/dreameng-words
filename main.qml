@@ -15,6 +15,10 @@ ApplicationWindow {
 	AppState {
 		id: appState
 	}
+	Database {
+		id: db
+		state: appState
+	}
 
 	property Component mainFact: Qt.createComponent("MainForm.ui.qml")
 	property Component wordFact: Qt.createComponent("WordForm.ui.qml")
@@ -42,7 +46,7 @@ ApplicationWindow {
 			break
 		case PageState.Menu:
 			//console.log("create menu")
-			obj = menuFact.createObject(flip, {"anchors.fill": flip, "visible": false})
+			obj = menuFact.createObject(flip, {"anchors.fill": flip, "visible": false, "db": db})
 			break
 		case PageState.None:
 			// fallthrough
@@ -171,11 +175,14 @@ ApplicationWindow {
 			lower = makePage(appState.lower)
 			noLower = appState.lower.status == PageState.None
 			lowerColor = flipColor(appState.page, appState.lower, AppState.Down)
+			db.saveState()
 		}
 	}
 
 	Component.onCompleted: {
-		appState.populateDemo()
+		console.log("init 0")
+		db.init()
+		console.log("init 10")
 		flip.init(
 			makePage(appState.page),
 			makePage(appState.left),
@@ -183,6 +190,7 @@ ApplicationWindow {
 			makePage(appState.upper),
 			makePage(appState.lower)
 		)
+		console.log("init 20")
 		flip.leftColor = flipColor(appState.page, appState.left, AppState.Left)
 		flip.rightColor = flipColor(appState.page, appState.right, AppState.Right)
 		flip.upperColor = flipColor(appState.page, appState.upper, AppState.Up)

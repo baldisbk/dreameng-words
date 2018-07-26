@@ -33,6 +33,7 @@ public:
 
 	// navigate
 	Q_INVOKABLE void next(Direction dir);
+	Q_INVOKABLE void init();
 
 	// initial list fill
 	Q_INVOKABLE void populateDemo();
@@ -40,8 +41,13 @@ public:
 	// for DB storage
 	Q_INVOKABLE QList<int> wordIndexes() const;
 	Q_INVOKABLE QVariantMap wordContents(int index) const;
+	Q_INVOKABLE QList<int> changedIndexes() const;
+	Q_INVOKABLE QVariantMap changedContents(int index) const;
+	Q_INVOKABLE QVariantMap stateContents() const;
 	// for DB load
+	Q_INVOKABLE void clearWords();
 	Q_INVOKABLE void addWord(QVariantMap word);
+	Q_INVOKABLE void loadState(QVariantMap state);
 
 	Settings* settings();
 
@@ -73,6 +79,7 @@ private:
 	void newRepeat();
 	void newErrors();
 	void newCheck();
+	void finish();
 
 	void shuffle();
 
