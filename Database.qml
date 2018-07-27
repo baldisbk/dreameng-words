@@ -9,18 +9,11 @@ QtObject {
 	property int dbVer: 1
 
 	function init() {
-		console.log("init 1")
 		db = LocalStorage.openDatabaseSync("TmpDB", "1.0", "", 0);
 		db.transaction(_makedb)
 		dump()
-		console.log("init 2")
 		db.readTransaction(_loadWords)
-		console.log("init 3")
-		if (state.wordIndexes().length === 0)
-			state.populateDemo()
-		console.log("init 4")
 		loadState()
-		console.log("init 5")
 	}
 	function dump() {db.readTransaction(_dump)}
 
@@ -96,14 +89,15 @@ QtObject {
 	}
 
 	function _storeWords(tx) {
+		console.log('======== Store words ========')
 		var words = state.wordIndexes()
 		for (var i=0; i<words.length; i++) {
 			var word = state.wordContents(words[i])
 			tx.executeSql(
-				'UPDATE WordsV1 SET '+
-					'word = ?, translation = ?, repeats = ?, errors = ? '+
-				'WHERE uid = ?',
-				[word.word, word.translation, word.repeats, word.errors, words[i]])
+				'INSERT INTO WordsV1('+
+					'uid, word, translation, repeats, errors) '+
+				'VALUES (?, ?, ?, ?, ?)',
+				[words[i], word.word, word.translation, word.repeats, word.errors])
 		}
 	}
 

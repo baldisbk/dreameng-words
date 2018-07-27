@@ -79,10 +79,16 @@ void AppState::next(Direction dir)
 	//qDebug() << "Next word:" << next.word;
 	switch (status) {
 	case PageState::Main:
-		setUpper(new StatState(PageState::Header, PageState::Repeat));
 		setLower(new PageState(PageState::Menu));
-		setLeft(new StatState(PageState::Header, PageState::Train));
-		setRight(new StatState(PageState::Header, PageState::Learn));
+		if (m_words.isEmpty()) {
+			setUpper(new PageState(PageState::None));
+			setLeft(new PageState(PageState::None));
+			setRight(new PageState(PageState::None));
+		} else {
+			setUpper(new StatState(PageState::Header, PageState::Repeat));
+			setLeft(new StatState(PageState::Header, PageState::Train));
+			setRight(new StatState(PageState::Header, PageState::Learn));
+		}
 		break;
 	case PageState::Menu:
 		setUpper(new PageState(PageState::Main));
@@ -157,10 +163,9 @@ void AppState::init()
 void AppState::addWord(QVariantMap word)
 {
 	int id = word.value("uid").toInt();
-	if (id == -1)
-		while (m_words.contains(++id)) {}
 	Word newWord;
 	newWord.load(word);
+	addWord(newWord, id);
 }
 
 void AppState::loadState(QVariantMap state)
@@ -192,34 +197,53 @@ void AppState::loadState(QVariantMap state)
 	next(Nowhere);
 }
 
-void AppState::populateDemo()
+void AppState::addWord(Word word, int id)
 {
-	if (!m_words.contains(0)) m_words[0] = Word("Zero", "Null");
-	if (!m_words.contains(1)) m_words[1] = Word("One", "Jeden");
-	if (!m_words.contains(2)) m_words[2] = Word("Two", "Dva");
-	if (!m_words.contains(3)) m_words[3] = Word("Three", "Tri");
-	if (!m_words.contains(4)) m_words[4] = Word("Four", "Ctyri");
-	if (!m_words.contains(5)) m_words[5] = Word("Five", "Pet");
-	if (!m_words.contains(6)) m_words[6] = Word("Six", "Sest");
-	if (!m_words.contains(7)) m_words[7] = Word("Seven", "Sedm");
-	if (!m_words.contains(8)) m_words[8] = Word("Eight", "Osm");
-	if (!m_words.contains(9)) m_words[9] = Word("Nine", "Devet");
-	if (!m_words.contains(10)) m_words[10] = Word("Ten", "Deset");
-	if (!m_words.contains(11)) m_words[11] = Word("Eleven", "Jedenact");
-	if (!m_words.contains(12)) m_words[12] = Word("Twelve", "Dvanact");
-	if (!m_words.contains(13)) m_words[13] = Word("Thirteen", "Trinact");
-	if (!m_words.contains(14)) m_words[14] = Word("Fourteen", "Ctrnact");
-	if (!m_words.contains(15)) m_words[15] = Word("Fifteen", "Patnact");
-	if (!m_words.contains(16)) m_words[16] = Word("Sixteen", "Sesnact");
-	if (!m_words.contains(17)) m_words[17] = Word("Seventeen", "Sedmnact");
-	if (!m_words.contains(18)) m_words[18] = Word("Eighteen", "Osmnact");
-	if (!m_words.contains(19)) m_words[19] = Word("Nineteen", "Devetnact");
-	if (!m_words.contains(20)) m_words[20] = Word("Twenty", "Dvacet");
+	if (id == -1)
+		while (m_words.contains(++id)) {}
+	m_words[id] = word;
+
 }
 
-void AppState::populateFile(QString /*filename*/)
+void AppState::populateDemo()
 {
+	addWord(Word("Zero", "Null"));
+	addWord(Word("One", "Jeden"));
+	addWord(Word("Two", "Dva"));
+	addWord(Word("Three", "Tri"));
+	addWord(Word("Four", "Ctyri"));
+	addWord(Word("Five", "Pet"));
+	addWord(Word("Six", "Sest"));
+	addWord(Word("Seven", "Sedm"));
+	addWord(Word("Eight", "Osm"));
+	addWord(Word("Nine", "Devet"));
+	addWord(Word("Ten", "Deset"));
+	addWord(Word("Eleven", "Jedenact"));
+	addWord(Word("Twelve", "Dvanact"));
+	addWord(Word("Thirteen", "Trinact"));
+	addWord(Word("Fourteen", "Ctrnact"));
+	addWord(Word("Fifteen", "Patnact"));
+	addWord(Word("Sixteen", "Sesnact"));
+	addWord(Word("Seventeen", "Sedmnact"));
+	addWord(Word("Eighteen", "Osmnact"));
+	addWord(Word("Nineteen", "Devetnact"));
+	addWord(Word("Twenty", "Dvacet"));
+}
 
+void AppState::populateFile(QString filename)
+{
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "Error file" << file.errorString();
+		return;
+	}
+	while (!file.atEnd()) {
+		QStringList list = QString(file.readLine()).split(";");
+		if (list.size() < 2) continue;
+		Word word(list[0], list[1]);
+		if (list.size() > 2) word.repeats = list[2].toInt();
+		addWord(word);
+	}
 }
 
 QList<int> AppState::wordIndexes() const
@@ -239,7 +263,7 @@ QVariantMap AppState::wordContents(int index) const
 
 QList<int> AppState::changedIndexes() const
 {
-	return m_selectedWords.toList();
+	return m_changedWords.keys();
 }
 
 QVariantMap AppState::changedContents(int index) const
@@ -469,7 +493,7 @@ void AppState::shuffle()
 
 void AppState::dump(QString prefix)
 {
-	//return;
+	return;
 	qDebug() << prefix;
 	qDebug() << "\tpage:" << page()->dump();
 	qDebug() << "\tleft:" << (left()?left()->dump():"null");

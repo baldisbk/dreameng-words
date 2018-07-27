@@ -49,6 +49,8 @@ public:
 	Q_INVOKABLE void addWord(QVariantMap word);
 	Q_INVOKABLE void loadState(QVariantMap state);
 
+	void addWord(Word word, int id = -1);
+
 	Settings* settings();
 
 	PageState* upper() const;

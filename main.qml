@@ -33,19 +33,15 @@ ApplicationWindow {
 		case PageState.Errors:
 		case PageState.Train:
 		case PageState.Repeat:
-			//console.log("create word")
 			obj = wordFact.createObject(flip, {"anchors.fill": flip, "visible": false})
 			break
 		case PageState.Header:
-			//console.log("create head")
 			obj = headFact.createObject(flip, {"anchors.fill": flip, "visible": false})
 			break
 		case PageState.Main:
-			//console.log("create main")
 			obj = mainFact.createObject(flip, {"anchors.fill": flip, "visible": false})
 			break
 		case PageState.Menu:
-			//console.log("create menu")
 			obj = menuFact.createObject(flip, {"anchors.fill": flip, "visible": false, "db": db})
 			break
 		case PageState.None:
@@ -68,7 +64,6 @@ ApplicationWindow {
 			page.word = state.word
 			page.trans = state.translation
 			page.transVisible = !state.wordOnly
-			//console.log("fill word", state.status, page.word, page.trans, page.transVisible)
 			break
 		case PageState.Header:
 			switch (state.otherState) {
@@ -101,10 +96,8 @@ ApplicationWindow {
 				page.smallCap = "smallCap"
 				break
 			}
-			//console.log("fill head", state.status, page.headCap, page.smallCap)
 			break
 		default:
-			//console.log("fill main", state.status)
 			break
 		}
 	}
@@ -180,9 +173,7 @@ ApplicationWindow {
 	}
 
 	Component.onCompleted: {
-		console.log("init 0")
 		db.init()
-		console.log("init 10")
 		flip.init(
 			makePage(appState.page),
 			makePage(appState.left),
@@ -190,10 +181,13 @@ ApplicationWindow {
 			makePage(appState.upper),
 			makePage(appState.lower)
 		)
-		console.log("init 20")
 		flip.leftColor = flipColor(appState.page, appState.left, AppState.Left)
 		flip.rightColor = flipColor(appState.page, appState.right, AppState.Right)
 		flip.upperColor = flipColor(appState.page, appState.upper, AppState.Up)
 		flip.lowerColor = flipColor(appState.page, appState.lower, AppState.Down)
+		flip.noLefter = appState.left.status == PageState.None
+		flip.noRighter = appState.right.status == PageState.None
+		flip.noUpper = appState.upper.status == PageState.None
+		flip.noLower = appState.lower.status == PageState.None
 	}
 }
