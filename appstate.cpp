@@ -4,6 +4,12 @@
 
 #include <QDebug>
 
+const int TrainThreshold = 7;
+const double OldRepeatCoeff = 0.8;
+const double TrainErrorRatio = 0.3;
+const double TrainErrorCost = 1.0;
+const double SecondToAgeCoeff = 1.0/10.0; //1.0/86400.0;
+
 QString listToString(QVector<int> list)
 {
 	QStringList res;
@@ -76,7 +82,7 @@ void AppState::next(Direction dir)
 	// next pages
 	auto status = page()->status();
 	auto next = nextWord();
-	//qDebug() << "Next word:" << next.word;
+	qDebug() << "Next word:" << next.word;
 	switch (status) {
 	case PageState::Main:
 		setLower(new PageState(PageState::Menu));
@@ -101,8 +107,8 @@ void AppState::next(Direction dir)
 		setUpper(new PageState(PageState::Main));
 		setLower(new PageState(PageState::None));
 		if (next.word.isEmpty()) {
-			setLeft(new PageState(othState));
-			setRight(new PageState(othState));
+			setLeft(new PageState(PageState::None));
+			setRight(new PageState(PageState::None));
 		} else {
 			setLeft(new WordState(othState, next, !showWordOnState(othState)));
 			setRight(new WordState(othState, next, !showWordOnState(othState)));
@@ -201,6 +207,7 @@ void AppState::addWord(Word word, int id)
 {
 	if (id == -1)
 		while (m_words.contains(++id)) {}
+	qDebug() << "Add word" << id;
 	m_words[id] = word;
 
 }
@@ -238,7 +245,7 @@ void AppState::populateFile(QString filename)
 		return;
 	}
 	while (!file.atEnd()) {
-		QStringList list = QString(file.readLine()).split(";");
+		QStringList list = QString(file.readLine()).trimmed().split(";");
 		if (list.size() < 2) continue;
 		Word word(list[0], list[1]);
 		if (list.size() > 2) word.repeats = list[2].toInt();
@@ -351,14 +358,27 @@ void AppState::setRight(PageState *right)
 void AppState::flipWord(bool ok)
 {
 	int index = m_selectedWords[m_currentWord];
-	Word w = m_words[index];
+	Word w = m_changedWords[index];
+	if (w.age > TrainThreshold) {
+		w.repeats *= OldRepeatCoeff;
+		w.errors *= OldRepeatCoeff;
+	}
 	++w.repeats;
+	double since = double(w.last.secsTo(QDateTime().currentDateTime()))*SecondToAgeCoeff;
+	w.last = QDateTime().currentDateTime();
 	if (!ok) {
 		++w.errors;
 		if (m_page->status() == PageState::Check)
 			m_errorWords.push_back(m_selectedWords[m_currentWord]);
+		since -= TrainErrorCost * w.errorRate();
+	}
+	if (w.age > TrainThreshold && (w.errorRate() > TrainErrorRatio)) {
+		w.age = 0;
+	} else if (since > 0) {
+		w.age += since;
 	}
 	m_changedWords[index] = w;
+	qDebug() << "-- flip" << w.store();
 	++m_currentWord;
 }
 
@@ -381,8 +401,6 @@ Word AppState::nextWord() const
 		return Word();
 	} else if (m_currentWord < m_selectedWords.size() - 1) {
 		return m_changedWords[m_selectedWords[m_currentWord+1]];
-//	} else if (!m_errorWords.isEmpty()) {
-//		return m_changedWords[m_errorWords[0]];
 	} else {
 		return Word();
 	}
@@ -406,13 +424,20 @@ int rand(int size)
 
 void AppState::newLearn()
 {
+	qDebug() << "-- newLearn";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
 	// select new words
-	for (int i = 0; i < m_settings.seqLength(); ++i) {
-		int newId = rand(m_words.size());
-		for (; m_selectedWords.contains(newId); newId = rand(m_words.size())) {}
+	QVector<int> candidates;
+	candidates.reserve(m_words.size());
+	for (int i = 0; i < m_words.size(); ++i) {
+		if (m_words[i].repeats == 0)
+			candidates.append(i);
+	}
+	shuffle(candidates);
+	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
+		int newId = candidates[i];
 		m_selectedWords.append(newId);
 		qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
@@ -420,18 +445,27 @@ void AppState::newLearn()
 	// end select new words
 	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
-	shuffle();
+	shuffle(m_selectedWords);
 }
 
 void AppState::newTrain()
 {
+	qDebug() << "-- newTrain";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
 	// select words to train
-	for (int i = 0; i < m_settings.seqLength(); ++i) {
-		int newId = rand(m_words.size());
-		for (; m_selectedWords.contains(newId); newId = rand(m_words.size())) {}
+	typedef QPair<int, double> T;
+	QVector<T> candidates;
+	candidates.reserve(m_words.size());
+	for (int i = 0; i < m_words.size(); ++i) {
+		if (m_words[i].repeats > 0 && m_words[i].age <= TrainThreshold)
+			candidates.append(T(i, m_words[i].age));
+	}
+	std::sort(candidates.begin(), candidates.end(),
+		  [](const T& a, const T& b){return a.second>b.second;});
+	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
+		int newId = candidates[i].first;
 		m_selectedWords.append(newId);
 		qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
@@ -439,45 +473,56 @@ void AppState::newTrain()
 	// end select words to train
 	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
-	shuffle();
+	shuffle(m_selectedWords);
 }
 
 void AppState::newRepeat()
 {
+	qDebug() << "-- newRepeat";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
 	// select old words
-	for (int i = 0; i < m_settings.seqLength(); ++i) {
-		int newId = rand(m_words.size());
-		for (; m_selectedWords.contains(newId); newId = rand(m_words.size())) {}
+	typedef QPair<int, double> T;
+	QVector<T> candidates;
+	candidates.reserve(m_words.size());
+	for (int i = 0; i < m_words.size(); ++i) {
+		if (m_words[i].repeats > 0 && m_words[i].age > TrainThreshold)
+			candidates.append(T(i, m_words[i].repeats - m_words[i].errors));
+	}
+	std::sort(candidates.begin(), candidates.end(),
+		  [](const T& a, const T& b){return a.second<b.second;});
+	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
+		int newId = candidates[i].first;
 		m_selectedWords.append(newId);
-		qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select old words
 	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
-	shuffle();
+	shuffle(m_selectedWords);
 }
 
 void AppState::newErrors()
 {
+	qDebug() << "-- newErrors";
 	m_selectedWords = m_errorWords;
 	m_errorWords.clear();
 	m_currentWord = -1;
-	shuffle();
+	shuffle(m_selectedWords);
 }
 
 void AppState::newCheck()
 {
+	qDebug() << "-- newCheck";
 	m_currentWord = -1;
 	m_errorWords.clear();
-	shuffle();
+	shuffle(m_selectedWords);
 }
 
 void AppState::finish()
 {
+	qDebug() << "-- finish";
 	for (auto wi = m_changedWords.begin(); wi != m_changedWords.end(); ++wi)
 		m_words[wi.key()] = wi.value();
 	m_selectedWords.clear();
@@ -486,9 +531,14 @@ void AppState::finish()
 	m_currentWord = -1;
 }
 
-void AppState::shuffle()
+void AppState::shuffle(QVector<int> &list)
 {
-	// shuffle m_selected
+	for (int i = list.size()-1; i>0; --i) {
+		int other = rand(i);
+		int tmp = list[i];
+		list[i] = list[other];
+		list[other] = tmp;
+	}
 }
 
 void AppState::dump(QString prefix)

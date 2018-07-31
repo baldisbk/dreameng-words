@@ -83,7 +83,7 @@ private:
 	void newCheck();
 	void finish();
 
-	void shuffle();
+	static void shuffle(QVector<int> &list);
 
 	void dump(QString prefix);
 

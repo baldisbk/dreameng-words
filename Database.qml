@@ -17,11 +17,11 @@ QtObject {
 	}
 	function dump() {db.readTransaction(_dump)}
 
-	function saveState() {db.transaction(_storeState); dump()}
-	function loadState() {db.readTransaction(_loadState); dump()}
+	function saveState() {db.transaction(_storeState)}
+	function loadState() {db.readTransaction(_loadState)}
 
-	function fromdemo() {state.populateDemo(); db.transaction(_storeWords); dump()}
-	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords); dump()}
+	function fromdemo() {state.populateDemo(); db.transaction(_storeWords)}
+	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords)}
 	function fromstolen(path) {state.populateFile(path); db.transaction(_storeWords); dump()}
 
 	function _dump(tx) {
@@ -45,7 +45,10 @@ QtObject {
 				w.rows.item(i).word,
 				w.rows.item(i).translation,
 				w.rows.item(i).repeats,
-				w.rows.item(i).errors)
+				w.rows.item(i).errors,
+				w.rows.item(i).last,
+				w.rows.item(i).age,
+				w.rows.item(i).speed)
 		console.log('======== End dump ========')
 	}
 
@@ -71,11 +74,25 @@ QtObject {
 		var words = state.changedIndexes()
 		for (var i=0; i<words.length; i++) {
 			var word = state.changedContents(words[i])
+			console.log(
+				word.uid,
+				word.word,
+				word.translation,
+				word.repeats,
+				word.errors,
+				word.last,
+				word.age,
+				word.speed)
 			tx.executeSql(
 				'UPDATE WordsV1 SET '+
-					'word = ?, translation = ?, repeats = ?, errors = ? '+
+					'word = ?, translation = ?, '+
+					'repeats = ?, errors = ?, '+
+					'last = ?, age = ?, speed = ? '+
 				'WHERE uid = ?',
-				[word.word, word.translation, word.repeats, word.errors, words[i]])
+				[word.word, word.translation,
+				 word.repeats, word.errors,
+				 word.last, word.age, word.speed,
+				 words[i]])
 		}
 	}
 
@@ -95,9 +112,11 @@ QtObject {
 			var word = state.wordContents(words[i])
 			tx.executeSql(
 				'INSERT INTO WordsV1('+
-					'uid, word, translation, repeats, errors) '+
-				'VALUES (?, ?, ?, ?, ?)',
-				[words[i], word.word, word.translation, word.repeats, word.errors])
+					'uid, word, translation, '+
+					'repeats, errors, last, age, speed) '+
+				'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+				[words[i], word.word, word.translation,
+				 word.repeats, word.errors, word.last, word.age, word.speed])
 		}
 	}
 
@@ -134,7 +153,10 @@ QtObject {
 				'word TEXT,'+
 				'translation TEXT,'+
 				'repeats INT,'+
-				'errors INT'+
+				'errors INT,'+
+				'last INT,'+
+				'age INT,'+
+				'speed INT'+
 				')')
 
 			// actually update...
