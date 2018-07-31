@@ -106,12 +106,17 @@ void AppState::next(Direction dir)
 		auto othState = static_cast<StatState*>(page())->otherState();
 		setUpper(new PageState(PageState::Main));
 		setLower(new PageState(PageState::None));
-		if (next.word.isEmpty()) {
-			setLeft(new PageState(PageState::None));
-			setRight(new PageState(PageState::None));
+		if (isWordState(othState)) {
+			if (m_selectedWords.isEmpty()) {
+				setLeft(new PageState(PageState::None));
+				setRight(new PageState(PageState::None));
+			} else {
+				setLeft(new WordState(othState, next, !showWordOnState(othState)));
+				setRight(new WordState(othState, next, !showWordOnState(othState)));
+			}
 		} else {
-			setLeft(new WordState(othState, next, !showWordOnState(othState)));
-			setRight(new WordState(othState, next, !showWordOnState(othState)));
+			setLeft(new PageState(othState));
+			setRight(new PageState(othState));
 		}
 		break;
 	}
@@ -404,6 +409,16 @@ Word AppState::nextWord() const
 	} else {
 		return Word();
 	}
+}
+
+bool AppState::isWordState(PageState::State state)
+{
+	return
+		(state == PageState::Learn) ||
+		(state == PageState::Check) ||
+		(state == PageState::Errors) ||
+		(state == PageState::Repeat) ||
+		(state == PageState::Train);
 }
 
 bool AppState::showWordOnState(PageState::State state)

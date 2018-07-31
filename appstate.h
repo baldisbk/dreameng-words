@@ -72,6 +72,7 @@ private:
 	Word curWord() const;
 	Word nextWord() const;
 
+	static bool isWordState(PageState::State state);
 	static bool showWordOnState(PageState::State state);
 	static bool canShowWordOnState(PageState::State state);
 
