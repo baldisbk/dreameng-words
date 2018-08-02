@@ -19,6 +19,13 @@ Item {
 	property color upperColor: "blue"
 	property color lowerColor: "yellow"
 
+	// look&feel
+	property int flipDuration: 100		// autoflip duration in ms
+	property int maxFlipAngle: 90		// flip that much for side-to-side drag
+	property int maxBlockAngle: 40		// flip that much only to show flip block
+	property int minSwipeLength: 20		// pixels to drag to start flip
+	property int maxBackoffAngle: 30	// flip back if angle is less
+
 	property int dir: AppState.Nowhere
 
 	function max(x,y) {return (x>y)?x:y}
@@ -46,7 +53,7 @@ Item {
 				id: rotbeh
 				NumberAnimation {
 					id: na
-					duration: 500
+					duration: flipDuration
 				}
 			}
 		}
@@ -128,7 +135,7 @@ Item {
 			var diffY = pressY - mouse.y
 			var fraq = 0
 			if (axis == 0) {
-				if (max(abs(diffX), abs(diffY)) < 20)
+				if (max(abs(diffX), abs(diffY)) < minSwipeLength)
 					return
 				if (abs(diffX)>abs(diffY)) {
 					axis = -1
@@ -137,14 +144,14 @@ Item {
 				}
 			}
 			rotbeh.enabled = false
-			var maxfraq = 90
+			var maxfraq = maxFlipAngle
 			if (axis>0) {
 				if ((diffY > 0 && noLower) || (diffY < 0 && noUpper))
-					maxfraq = 40
+					maxfraq = maxBlockAngle
 				fraq = maxfraq*diffY/height
 			}else{
 				if ((diffX > 0 && noRighter) || (diffX < 0 && noLefter))
-					maxfraq = 40
+					maxfraq = maxBlockAngle
 				fraq = -maxfraq*diffX/width
 			}
 			rotation.axis.x = (axis>0)?1:0
@@ -156,7 +163,7 @@ Item {
 			if (axis == 0) {
 				return
 			}
-			if (abs(rotation.angle)<30)
+			if (abs(rotation.angle)<maxBackoffAngle)
 				rotation.angle = 0
 			else if (rotation.angle>0) {
 				if (axis<0) {

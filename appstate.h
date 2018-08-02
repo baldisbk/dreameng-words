@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQuickItem>
+#include <QTime>
 
 #include "settings.h"
 #include "pagestate.h"
@@ -83,6 +84,7 @@ private:
 	void newErrors();
 	void newCheck();
 	void finish();
+	void cancel();
 
 	static void shuffle(QVector<int> &list);
 
@@ -102,6 +104,9 @@ private:
 	PageState *m_left;
 	PageState *m_right;
 	PageState *m_page;
+
+	QTime m_timer;
+	int m_lastElapsed;
 };
 
 #endif // APPSTATE_H

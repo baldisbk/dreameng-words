@@ -74,15 +74,6 @@ QtObject {
 		var words = state.changedIndexes()
 		for (var i=0; i<words.length; i++) {
 			var word = state.changedContents(words[i])
-			console.log(
-				word.uid,
-				word.word,
-				word.translation,
-				word.repeats,
-				word.errors,
-				word.last,
-				word.age,
-				word.speed)
 			tx.executeSql(
 				'UPDATE WordsV1 SET '+
 					'word = ?, translation = ?, '+

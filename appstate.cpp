@@ -9,6 +9,8 @@ const double OldRepeatCoeff = 0.8;
 const double TrainErrorRatio = 0.3;
 const double TrainErrorCost = 1.0;
 const double SecondToAgeCoeff = 1.0/10.0; //1.0/86400.0;
+const double BadSpeedRatio = 2.0;
+const double BadSpeedCost = 1.0;
 
 QString listToString(QVector<int> list)
 {
@@ -28,11 +30,16 @@ QVector<int> stringToList(QString str)
 AppState::AppState(QObject *parent) : QObject(parent),
 	m_upper(nullptr), m_lower(nullptr), m_left(nullptr), m_right(nullptr), m_page(nullptr)
 {
+	m_timer.start();
 }
 
 void AppState::next(Direction dir)
 {
 	dump("Before next");
+
+	int prevElapsed = m_lastElapsed;
+	m_lastElapsed = m_timer.restart();
+	qDebug() << "Timer" << m_lastElapsed;
 
 	// actions & stats before
 	switch (page()->status()) {
@@ -41,8 +48,17 @@ void AppState::next(Direction dir)
 	case PageState::Errors:
 	case PageState::Train:
 	case PageState::Repeat:
-		if (dir == Right || dir == Left)
+		switch (dir) {
+		case Right:
+		case Left:
 			flipWord(dir == Right);
+			break;
+		case Down:
+			m_lastElapsed += prevElapsed;
+			break;
+		default:
+			break;
+		}
 		break;
 	case PageState::Header:
 		if (dir != Nowhere)
@@ -75,6 +91,8 @@ void AppState::next(Direction dir)
 		default: break;
 		}
 		break;
+	case PageState::Main:
+		cancel();
 	default:
 		break;
 	}
@@ -82,7 +100,7 @@ void AppState::next(Direction dir)
 	// next pages
 	auto status = page()->status();
 	auto next = nextWord();
-	qDebug() << "Next word:" << next.word;
+	//qDebug() << "Next word:" << next.word;
 	switch (status) {
 	case PageState::Main:
 		setLower(new PageState(PageState::Menu));
@@ -141,6 +159,7 @@ void AppState::next(Direction dir)
 			} else if (m_errorWords.isEmpty()) {
 				// no errors - it's over
 				if (page()->status() == PageState::Check)
+					// this last will be with error
 					setLeft(new StatState(PageState::Header, PageState::Errors));
 				else
 					setLeft(new StatState(PageState::Header, PageState::Main));
@@ -212,7 +231,7 @@ void AppState::addWord(Word word, int id)
 {
 	if (id == -1)
 		while (m_words.contains(++id)) {}
-	qDebug() << "Add word" << id;
+	//qDebug() << "Add word" << id;
 	m_words[id] = word;
 
 }
@@ -368,6 +387,7 @@ void AppState::flipWord(bool ok)
 		w.repeats *= OldRepeatCoeff;
 		w.errors *= OldRepeatCoeff;
 	}
+	int newspeed = w.speed + (m_lastElapsed-w.speed)/(w.repeats/2+1);
 	++w.repeats;
 	double since = double(w.last.secsTo(QDateTime().currentDateTime()))*SecondToAgeCoeff;
 	w.last = QDateTime().currentDateTime();
@@ -377,13 +397,17 @@ void AppState::flipWord(bool ok)
 			m_errorWords.push_back(m_selectedWords[m_currentWord]);
 		since -= TrainErrorCost * w.errorRate();
 	}
+	if (w.speed != 0 && newspeed > w.speed*BadSpeedRatio) {
+		since -= (double(newspeed)/double(w.speed) - BadSpeedRatio)*BadSpeedCost;
+	}
 	if (w.age > TrainThreshold && (w.errorRate() > TrainErrorRatio)) {
 		w.age = 0;
 	} else if (since > 0) {
 		w.age += since;
 	}
+	w.speed = newspeed;
 	m_changedWords[index] = w;
-	qDebug() << "-- flip" << w.store();
+	//qDebug() << "-- flip" << w.store();
 	++m_currentWord;
 }
 
@@ -439,7 +463,7 @@ int rand(int size)
 
 void AppState::newLearn()
 {
-	qDebug() << "-- newLearn";
+	//qDebug() << "-- newLearn";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
@@ -454,7 +478,7 @@ void AppState::newLearn()
 	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
 		int newId = candidates[i];
 		m_selectedWords.append(newId);
-		qDebug() << "\t\tadd word" << newId;
+		//qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select new words
@@ -465,7 +489,7 @@ void AppState::newLearn()
 
 void AppState::newTrain()
 {
-	qDebug() << "-- newTrain";
+	//qDebug() << "-- newTrain";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
@@ -482,7 +506,7 @@ void AppState::newTrain()
 	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
 		int newId = candidates[i].first;
 		m_selectedWords.append(newId);
-		qDebug() << "\t\tadd word" << newId;
+		//qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select words to train
@@ -493,7 +517,7 @@ void AppState::newTrain()
 
 void AppState::newRepeat()
 {
-	qDebug() << "-- newRepeat";
+	//qDebug() << "-- newRepeat";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
@@ -520,7 +544,7 @@ void AppState::newRepeat()
 
 void AppState::newErrors()
 {
-	qDebug() << "-- newErrors";
+	//qDebug() << "-- newErrors";
 	m_selectedWords = m_errorWords;
 	m_errorWords.clear();
 	m_currentWord = -1;
@@ -529,7 +553,7 @@ void AppState::newErrors()
 
 void AppState::newCheck()
 {
-	qDebug() << "-- newCheck";
+	//qDebug() << "-- newCheck";
 	m_currentWord = -1;
 	m_errorWords.clear();
 	shuffle(m_selectedWords);
@@ -537,9 +561,19 @@ void AppState::newCheck()
 
 void AppState::finish()
 {
-	qDebug() << "-- finish";
+	//qDebug() << "-- finish";
 	for (auto wi = m_changedWords.begin(); wi != m_changedWords.end(); ++wi)
 		m_words[wi.key()] = wi.value();
+	m_selectedWords.clear();
+	m_changedWords.clear();
+	m_errorWords.clear();
+	m_currentWord = -1;
+}
+
+void AppState::cancel()
+{
+	//qDebug() << "-- cancel";
+	m_changedWords.clear();
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
