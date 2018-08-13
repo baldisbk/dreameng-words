@@ -16,6 +16,7 @@ public:
 		Menu,
 
 		Header,
+		Footer,
 
 		Learn,
 		Check,

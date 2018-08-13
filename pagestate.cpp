@@ -12,6 +12,7 @@ QString PageState::stateToString(PageState::State state)
 	case Errors: return "Errors";
 	case Train: return "Train";
 	case Repeat: return "Repeat";
+	case Footer: return "Again";
 	default: return "Impossible";
 	}
 }
@@ -26,6 +27,7 @@ PageState::State PageState::stringToState(QString str)
 	if (str == "Errors") return Errors;
 	if (str == "Train") return Train;
 	if (str == "Repeat") return Repeat;
+	if (str == "Again") return Footer;
 	return None;
 }
 

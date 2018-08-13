@@ -14,6 +14,7 @@ ApplicationWindow {
 
 	AppState {
 		id: appState
+		onSaveWords: db.saveWords()
 	}
 	Database {
 		id: db
@@ -36,6 +37,7 @@ ApplicationWindow {
 			obj = wordFact.createObject(flip, {"anchors.fill": flip, "visible": false})
 			break
 		case PageState.Header:
+		case PageState.Footer:
 			obj = headFact.createObject(flip, {"anchors.fill": flip, "visible": false})
 			break
 		case PageState.Main:
@@ -65,6 +67,10 @@ ApplicationWindow {
 			page.trans = state.translation
 			page.transVisible = !state.wordOnly
 			break
+		case PageState.Footer:
+			page.headCap = "AGAIN?"
+			page.smallCap = "smallCap"
+			break
 		case PageState.Header:
 			switch (state.otherState) {
 			case PageState.Learn:
@@ -91,6 +97,10 @@ ApplicationWindow {
 				page.headCap = "COMPLETE"
 				page.smallCap = "smallCap"
 				break
+			case PageState.Footer:
+				page.headCap = "AGAIN?"
+				page.smallCap = "smallCap"
+				break
 			default:
 				page.headCap = "UNEXPECTED! "+state.otherState
 				page.smallCap = "smallCap"
@@ -110,6 +120,7 @@ ApplicationWindow {
 		case PageState.Check:
 		case PageState.Repeat:
 		case PageState.Train:
+		case PageState.Footer:
 			switch(dir) {
 			case AppState.Up: return "blue"
 			case AppState.Down: return "yellow"

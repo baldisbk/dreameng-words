@@ -39,7 +39,6 @@ void AppState::next(Direction dir)
 
 	int prevElapsed = m_lastElapsed;
 	m_lastElapsed = m_timer.restart();
-	qDebug() << "Timer" << m_lastElapsed;
 
 	// actions & stats before
 	switch (page()->status()) {
@@ -56,6 +55,9 @@ void AppState::next(Direction dir)
 		case Down:
 			m_lastElapsed += prevElapsed;
 			break;
+		case Up:
+			cancel();
+			break;
 		default:
 			break;
 		}
@@ -63,6 +65,12 @@ void AppState::next(Direction dir)
 	case PageState::Header:
 		if (dir != Nowhere)
 			m_currentWord = 0;
+		if (dir == Up)
+			cancel();
+		break;
+	case PageState::Footer:
+		if (dir == Left)
+			finish();
 		break;
 	default:
 		break;
@@ -87,12 +95,12 @@ void AppState::next(Direction dir)
 		case PageState::Errors: newErrors(); break;
 		case PageState::Train: newTrain(); break;
 		case PageState::Repeat: newRepeat(); break;
-		case PageState::Main: finish(); break;
 		default: break;
 		}
 		break;
-	case PageState::Main:
-		cancel();
+	case PageState::Footer:
+		again();
+		break;
 	default:
 		break;
 	}
@@ -100,7 +108,6 @@ void AppState::next(Direction dir)
 	// next pages
 	auto status = page()->status();
 	auto next = nextWord();
-	//qDebug() << "Next word:" << next.word;
 	switch (status) {
 	case PageState::Main:
 		setLower(new PageState(PageState::Menu));
@@ -158,12 +165,12 @@ void AppState::next(Direction dir)
 				setRight(new StatState(PageState::Header, PageState::Check));
 			} else if (m_errorWords.isEmpty()) {
 				// no errors - it's over
-				if (page()->status() == PageState::Check)
+				if (!showWordOnState(status))
 					// this last will be with error
 					setLeft(new StatState(PageState::Header, PageState::Errors));
 				else
-					setLeft(new StatState(PageState::Header, PageState::Main));
-				setRight(new StatState(PageState::Header, PageState::Main));
+					setLeft(new StatState(PageState::Footer, PageState::Check));
+				setRight(new StatState(PageState::Footer, PageState::Check));
 			} else {
 				// had errors - fix 'em, bitch
 				setLeft(new StatState(PageState::Header, PageState::Errors));
@@ -171,6 +178,14 @@ void AppState::next(Direction dir)
 			}
 		}
 		break;
+	case PageState::Footer: {
+		auto othState = static_cast<StatState*>(page())->otherState();
+		setUpper(new PageState(PageState::None));
+		setLower(new PageState(PageState::None));
+		setLeft(new PageState(PageState::Main));
+		setRight(new StatState(PageState::Header, othState));
+		break;
+	}
 //	case PageState::Ask:
 		// n/a
 		break;
@@ -213,6 +228,7 @@ void AppState::loadState(QVariantMap state)
 		m_page = new WordState();
 		break;
 	case PageState::Header:
+	case PageState::Footer:
 		m_page = new StatState();
 		break;
 	default:
@@ -223,7 +239,12 @@ void AppState::loadState(QVariantMap state)
 	m_selectedWords = stringToList(state["selected"].toString());
 	m_errorWords = stringToList(state["errors"].toString());
 	m_currentWord = state["current"].toInt();
-	foreach(int w, m_selectedWords) m_changedWords[w] = m_words[w];
+	QStringList list = state["changed"].toString().split(" ");
+	int i = 0;
+	for(int w: m_selectedWords) {
+		m_changedWords[w] = m_words[w];
+		m_changedWords[w].loadStats(list[i++]);
+	}
 	next(Nowhere);
 }
 
@@ -315,6 +336,10 @@ QVariantMap AppState::stateContents() const
 	res["selected"] = listToString(m_selectedWords);
 	res["errors"] = listToString(m_errorWords);
 	res["current"] = m_currentWord;
+	QStringList ch;
+	for(auto index: m_selectedWords)
+		ch.append(m_changedWords[index].storeStats());
+	res["changed"] = ch.join(" ");
 	return res;
 }
 
@@ -393,7 +418,7 @@ void AppState::flipWord(bool ok)
 	w.last = QDateTime().currentDateTime();
 	if (!ok) {
 		++w.errors;
-		if (m_page->status() == PageState::Check)
+		if (!showWordOnState(m_page->status()))
 			m_errorWords.push_back(m_selectedWords[m_currentWord]);
 		since -= TrainErrorCost * w.errorRate();
 	}
@@ -407,7 +432,7 @@ void AppState::flipWord(bool ok)
 	}
 	w.speed = newspeed;
 	m_changedWords[index] = w;
-	//qDebug() << "-- flip" << w.store();
+	qDebug() << "-- flip" << ok;
 	++m_currentWord;
 }
 
@@ -463,7 +488,7 @@ int rand(int size)
 
 void AppState::newLearn()
 {
-	//qDebug() << "-- newLearn";
+	qDebug() << "-- newLearn";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
@@ -478,18 +503,16 @@ void AppState::newLearn()
 	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
 		int newId = candidates[i];
 		m_selectedWords.append(newId);
-		//qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select new words
-	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
 	shuffle(m_selectedWords);
 }
 
 void AppState::newTrain()
 {
-	//qDebug() << "-- newTrain";
+	qDebug() << "-- newTrain";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
@@ -506,18 +529,16 @@ void AppState::newTrain()
 	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
 		int newId = candidates[i].first;
 		m_selectedWords.append(newId);
-		//qDebug() << "\t\tadd word" << newId;
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select words to train
-	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
 	shuffle(m_selectedWords);
 }
 
 void AppState::newRepeat()
 {
-	//qDebug() << "-- newRepeat";
+	qDebug() << "-- newRepeat";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
@@ -537,14 +558,13 @@ void AppState::newRepeat()
 		m_changedWords[newId] = m_words[newId];
 	}
 	// end select old words
-	m_selectedWords = m_changedWords.keys().toVector();
 	m_currentWord = -1;
 	shuffle(m_selectedWords);
 }
 
 void AppState::newErrors()
 {
-	//qDebug() << "-- newErrors";
+	qDebug() << "-- newErrors";
 	m_selectedWords = m_errorWords;
 	m_errorWords.clear();
 	m_currentWord = -1;
@@ -553,7 +573,7 @@ void AppState::newErrors()
 
 void AppState::newCheck()
 {
-	//qDebug() << "-- newCheck";
+	qDebug() << "-- newCheck";
 	m_currentWord = -1;
 	m_errorWords.clear();
 	shuffle(m_selectedWords);
@@ -561,7 +581,8 @@ void AppState::newCheck()
 
 void AppState::finish()
 {
-	//qDebug() << "-- finish";
+	emit saveWords();
+	qDebug() << "-- finish";
 	for (auto wi = m_changedWords.begin(); wi != m_changedWords.end(); ++wi)
 		m_words[wi.key()] = wi.value();
 	m_selectedWords.clear();
@@ -570,9 +591,21 @@ void AppState::finish()
 	m_currentWord = -1;
 }
 
+void AppState::again()
+{
+	emit saveWords();
+	qDebug() << "-- again";
+	for (auto wi = m_changedWords.begin(); wi != m_changedWords.end(); ++wi)
+		m_words[wi.key()] = wi.value();
+	m_currentWord = -1;
+	m_errorWords.clear();
+	m_selectedWords = m_changedWords.keys().toVector();
+	shuffle(m_selectedWords);
+}
+
 void AppState::cancel()
 {
-	//qDebug() << "-- cancel";
+	qDebug() << "-- cancel";
 	m_changedWords.clear();
 	m_selectedWords.clear();
 	m_changedWords.clear();

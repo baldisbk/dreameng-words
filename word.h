@@ -26,6 +26,23 @@ struct Word
 		res["speed"] = speed;
 		return res;
 	}
+	QString storeStats() const {
+		return QString("%1;%2;%3;%4;%5").
+			arg(repeats).
+			arg(errors).
+			arg(last.toSecsSinceEpoch()).
+			arg(age).
+			arg(speed);
+	}
+	void loadStats(QString stats) {
+		QStringList list = stats.split(";");
+		if (list.size() < 5) return;
+		repeats = list[0].toInt();
+		errors = list[1].toInt();
+		last.fromSecsSinceEpoch(list[2].toLongLong());
+		age = list[3].toDouble();
+		speed = list[4].toInt();
+	}
 	void load(QVariantMap m) {
 		word = m.value("word").toString();
 		translation = m.value("translation").toString();
@@ -37,6 +54,16 @@ struct Word
 	}
 	double errorRate() const {
 		return double(errors)/double(repeats);
+	}
+	QString dump() const {
+		return QString("%1/%2 %3/%4 %5(%6) S%7").
+			arg(word).
+			arg(translation).
+			arg(errors).
+			arg(repeats).
+			arg(last.toString()).
+			arg(age).
+			arg(speed);
 	}
 
         QString word;

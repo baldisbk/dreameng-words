@@ -44,15 +44,22 @@ Item {
 	Rectangle {
 		id: second
 		height: parent.height/3
-		color: "#3f3f00"
 		anchors {
 			top: first.bottom
 			left: parent.left
 			right: parent.right
 		}
+		Label{
+			anchors.fill: parent
+			text: "Dump"
+			font.pointSize: 30
+			font.bold: true
+			horizontalAlignment: Text.AlignHCenter
+			verticalAlignment: Text.AlignVCenter
+		}
 		MouseArea {
 			anchors.fill: parent
-			onClicked: db.saveState()
+			onClicked: db.dump()
 		}
 	}
 	Rectangle {
@@ -66,7 +73,6 @@ Item {
 		}
 		MouseArea {
 			anchors.fill: parent
-			onClicked: db.fromdemo()
 		}
 	}
 }

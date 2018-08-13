@@ -66,6 +66,9 @@ public slots:
 	void setLeft(PageState *left);
 	void setRight(PageState* right);
 
+signals:
+	void saveWords();
+
 private:
 	void flipWord(bool ok);
 	void showWord();
@@ -84,6 +87,7 @@ private:
 	void newErrors();
 	void newCheck();
 	void finish();
+	void again();
 	void cancel();
 
 	static void shuffle(QVector<int> &list);

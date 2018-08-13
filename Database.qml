@@ -19,9 +19,10 @@ QtObject {
 
 	function saveState() {db.transaction(_storeState)}
 	function loadState() {db.readTransaction(_loadState)}
+	function saveWords() {db.transaction(_storeCurrent)}
 
 	function fromdemo() {state.populateDemo(); db.transaction(_storeWords)}
-	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords)}
+	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords); dump()}
 	function fromstolen(path) {state.populateFile(path); db.transaction(_storeWords); dump()}
 
 	function _dump(tx) {
@@ -63,7 +64,7 @@ QtObject {
 	}
 
 	function _storeState(tx) {
-		console.log('======== Store state ========')
+		//console.log('======== Store state ========')
 		tx.executeSql('DELETE FROM StateV1')
 		var st = state.stateContents()
 		tx.executeSql(
@@ -71,6 +72,10 @@ QtObject {
 				'state, statectx, changed, selected, errors, current) '+
 			'VALUES (?, ?, ?, ?, ?, ?)',
 			[st.state, st.statectx, st.changed, st.selected, st.errors, st.current])
+	}
+
+	function _storeCurrent(tx) {
+		//console.log('======== Store current ========')
 		var words = state.changedIndexes()
 		for (var i=0; i<words.length; i++) {
 			var word = state.changedContents(words[i])
@@ -88,7 +93,7 @@ QtObject {
 	}
 
 	function _loadState(tx) {
-		console.log('======== Load state ========')
+		//console.log('======== Load state ========')
 		var res = tx.executeSql('SELECT * FROM StateV1')
 		if (res.rows.length > 0)
 			state.loadState(res.rows.item(0))
@@ -97,7 +102,7 @@ QtObject {
 	}
 
 	function _storeWords(tx) {
-		console.log('======== Store words ========')
+		//console.log('======== Store words ========')
 		var words = state.wordIndexes()
 		for (var i=0; i<words.length; i++) {
 			var word = state.wordContents(words[i])
@@ -112,7 +117,7 @@ QtObject {
 	}
 
 	function _loadWords(tx) {
-		console.log('======== Load words ========')
+		//console.log('======== Load words ========')
 		var res = tx.executeSql('SELECT * FROM WordsV1')
 		for (var i = 0; i < res.rows.length; ++i) {
 			state.addWord(res.rows.item(i));
