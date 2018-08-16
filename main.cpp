@@ -7,7 +7,6 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);  
     QCoreApplication::setOrganizationName("Vadim Balakhanov");
     QCoreApplication::setOrganizationDomain("baldis.org");
     QCoreApplication::setApplicationName("DreamENG WordLearn");
