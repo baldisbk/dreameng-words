@@ -69,41 +69,41 @@ ApplicationWindow {
 			break
 		case PageState.Footer:
 			page.headCap = "AGAIN?"
-			page.smallCap = "smallCap"
+			page.smallCap = state.description
 			break
 		case PageState.Header:
 			switch (state.otherState) {
 			case PageState.Learn:
 				page.headCap = "LEARN"
-				page.smallCap = "smallCap"
+				page.smallCap = state.description
 				break
 			case PageState.Check:
 				page.headCap = "CHECK"
-				page.smallCap = "smallCap"
+				page.smallCap = state.description
 				break
 			case PageState.Errors:
 				page.headCap = "ERRORS"
-				page.smallCap = "smallCap"
+				page.smallCap = state.description
 				break
 			case PageState.Train:
 				page.headCap = "TRAIN"
-				page.smallCap = "smallCap"
+				page.smallCap = state.description
 				break
 			case PageState.Repeat:
 				page.headCap = "REPEAT"
-				page.smallCap = "smallCap"
+				page.smallCap = state.description
 				break
 			case PageState.Main:
 				page.headCap = "COMPLETE"
-				page.smallCap = "smallCap"
+				page.smallCap = state.description
 				break
 			case PageState.Footer:
 				page.headCap = "AGAIN?"
-				page.smallCap = "smallCap"
+				page.smallCap = state.description
 				break
 			default:
 				page.headCap = "UNEXPECTED! "+state.otherState
-				page.smallCap = "smallCap"
+				page.smallCap = state.description
 				break
 			}
 			break

@@ -89,10 +89,13 @@ class StatState : public PageState
 	Q_OBJECT
 public:
 	explicit StatState(QObject *parent = nullptr) : PageState(parent) {}
-	StatState(State state, State addState, QObject *parent = nullptr);
+	StatState(State state, State addState, QString desc, QObject *parent = nullptr);
 
 	Q_PROPERTY(State otherState READ otherState WRITE setOtherState NOTIFY otherStateChanged)
+	Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
+
 	State otherState() const;
+	QString description() const;
 
 	virtual QString dump() const override;
 	virtual QString store() const override;
@@ -100,12 +103,15 @@ public:
 
 signals:
 	void otherStateChanged(State otherState);
+	void descriptionChanged(QString description);
 
 public slots:
 	void setOtherState(State otherState);
+	void setDescription(QString description);
 
 private:
 	State m_otherState;
+	QString m_description;
 };
 
 #endif // PAGESTATE_H

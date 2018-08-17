@@ -116,9 +116,15 @@ void AppState::next(Direction dir)
 			setLeft(new PageState(PageState::None));
 			setRight(new PageState(PageState::None));
 		} else {
-			setUpper(new StatState(PageState::Header, PageState::Repeat));
-			setLeft(new StatState(PageState::Header, PageState::Train));
-			setRight(new StatState(PageState::Header, PageState::Learn));
+			setUpper(new StatState(
+				PageState::Header, PageState::Repeat,
+				QString(tr("You gonna remind %1 words")).arg(m_settings.seqLength())));
+			setLeft(new StatState(
+				PageState::Header, PageState::Train,
+				QString(tr("You gonna repeat %1 words")).arg(m_settings.seqLength())));
+			setRight(new StatState(
+				PageState::Header, PageState::Learn,
+				QString(tr("You gonna learn %1 new words")).arg(m_settings.seqLength())));
 		}
 		break;
 	case PageState::Menu:
@@ -161,20 +167,34 @@ void AppState::next(Direction dir)
 		} else {
 			if (showWordOnState(status)) {
 				// there were translations? check 'em
-				setLeft(new StatState(PageState::Header, PageState::Check));
-				setRight(new StatState(PageState::Header, PageState::Check));
+				setLeft(new StatState(
+					PageState::Header, PageState::Check,
+					QString(tr("Let's check these words"))));
+				setRight(new StatState(
+					PageState::Header, PageState::Check,
+					QString(tr("Let's check these words"))));
 			} else if (m_errorWords.isEmpty()) {
 				// no errors - it's over
 				if (!showWordOnState(status))
 					// this last will be with error
-					setLeft(new StatState(PageState::Header, PageState::Errors));
+					setLeft(new StatState(
+						PageState::Header, PageState::Errors,
+						QString(tr("You should fix that error"))));
 				else
-					setLeft(new StatState(PageState::Footer, PageState::Check));
-				setRight(new StatState(PageState::Footer, PageState::Check));
+					setLeft(new StatState(
+						PageState::Footer, PageState::Check,
+						QString(tr("Some statistics here"))));
+				setRight(new StatState(
+					PageState::Footer, PageState::Check,
+					QString(tr("Some statistics here"))));
 			} else {
 				// had errors - fix 'em, bitch
-				setLeft(new StatState(PageState::Header, PageState::Errors));
-				setRight(new StatState(PageState::Header, PageState::Errors));
+				setLeft(new StatState(
+					PageState::Header, PageState::Errors,
+					QString(tr("You should fix %1 errors")).arg(m_errorWords.size()+1)));
+				setRight(new StatState(
+					PageState::Header, PageState::Errors,
+					QString(tr("You should fix %1 errors")).arg(m_errorWords.size())));
 			}
 		}
 		break;
@@ -183,7 +203,9 @@ void AppState::next(Direction dir)
 		setUpper(new PageState(PageState::None));
 		setLower(new PageState(PageState::None));
 		setLeft(new PageState(PageState::Main));
-		setRight(new StatState(PageState::Header, othState));
+		setRight(new StatState(
+			PageState::Header, othState,
+			QString(tr("Let's try to improve"))));
 		break;
 	}
 //	case PageState::Ask:
