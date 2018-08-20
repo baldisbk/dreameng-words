@@ -51,6 +51,7 @@ void AppState::next(Direction dir)
 		case Right:
 		case Left:
 			flipWord(dir == Right);
+			m_totalElapsed += m_lastElapsed;
 			break;
 		case Down:
 			m_lastElapsed += prevElapsed;
@@ -63,8 +64,10 @@ void AppState::next(Direction dir)
 		}
 		break;
 	case PageState::Header:
-		if (dir != Nowhere)
+		if (dir != Nowhere) {
 			m_currentWord = 0;
+			m_totalElapsed = 0;
+		}
 		if (dir == Up)
 			cancel();
 		break;
@@ -90,15 +93,27 @@ void AppState::next(Direction dir)
 	case PageState::Header:
 		if (dir == Nowhere) break;
 		switch(static_cast<StatState*>(page())->otherState()) {
-		case PageState::Learn: newLearn(); break;
+		case PageState::Learn: newLearn(); m_prevTotalElapsed = 0; break;
 		case PageState::Check: newCheck(); break;
 		case PageState::Errors: newErrors(); break;
-		case PageState::Train: newTrain(); break;
-		case PageState::Repeat: newRepeat(); break;
+		case PageState::Train: newTrain(); m_prevTotalElapsed = 0; break;
+		case PageState::Repeat: newRepeat(); m_prevTotalElapsed = 0; break;
 		default: break;
 		}
 		break;
 	case PageState::Footer:
+		// TODO someday: do this after flip start and before it ends
+		if (m_prevTotalElapsed == 0) {
+			static_cast<StatState*>(page())->setDescription(
+				QString(tr("Run took %1 seconds.\nTry to improve?")).
+					arg(double(m_totalElapsed)/1000));
+		} else {
+			static_cast<StatState*>(page())->setDescription(
+				QString(tr("Run took %2 seconds (previous %1).\nTry to improve?")).
+					arg(double(m_prevTotalElapsed)/1000).
+					arg(double(m_totalElapsed)/1000));
+		}
+		m_prevTotalElapsed = m_totalElapsed;
 		again();
 		break;
 	default:
@@ -261,6 +276,8 @@ void AppState::loadState(QVariantMap state)
 	m_selectedWords = stringToList(state["selected"].toString());
 	m_errorWords = stringToList(state["errors"].toString());
 	m_currentWord = state["current"].toInt();
+	m_totalElapsed = state["runtime"].toInt();
+	m_prevTotalElapsed = state["prevruntime"].toInt();
 	QStringList list = state["changed"].toString().split(" ");
 	int i = 0;
 	for(int w: m_selectedWords) {
@@ -362,6 +379,8 @@ QVariantMap AppState::stateContents() const
 	for(auto index: m_selectedWords)
 		ch.append(m_changedWords[index].storeStats());
 	res["changed"] = ch.join(" ");
+	res["runtime"] = m_totalElapsed;
+	res["prevruntime"] = m_prevTotalElapsed;
 	return res;
 }
 

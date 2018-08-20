@@ -69,9 +69,11 @@ QtObject {
 		var st = state.stateContents()
 		tx.executeSql(
 			'INSERT INTO StateV1('+
-				'state, statectx, changed, selected, errors, current) '+
-			'VALUES (?, ?, ?, ?, ?, ?)',
-			[st.state, st.statectx, st.changed, st.selected, st.errors, st.current])
+				'state, statectx, changed, selected, errors, current, '+
+				'runtime, prevruntime) '+
+			'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+			[st.state, st.statectx, st.changed, st.selected,
+			 st.errors, st.current, st.runtime, st.prevruntime])
 	}
 
 	function _storeCurrent(tx) {
@@ -141,7 +143,9 @@ QtObject {
 				'changed TEXT,'+
 				'selected TEXT,'+
 				'errors TEXT,'+
-				'current INT'+
+				'current INT,'+
+				'runtime INT,'+
+				'prevruntime INT'+
 				')')
 			tx.executeSql(
 				'CREATE TABLE WordsV1('+

@@ -111,6 +111,8 @@ private:
 
 	QTime m_timer;
 	int m_lastElapsed;
+	int m_totalElapsed;
+	int m_prevTotalElapsed;
 };
 
 #endif // APPSTATE_H
