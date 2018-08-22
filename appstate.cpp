@@ -1,6 +1,10 @@
 #include "appstate.h"
 
 #include <QRandomGenerator>
+#include <QStack>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include <QDebug>
 
@@ -15,7 +19,7 @@ const double BadSpeedCost = 1.0;
 QString listToString(QVector<int> list)
 {
 	QStringList res;
-	foreach (auto i, list) res.append(QString::number(i));
+	for (auto i: list) res.append(QString::number(i));
 	return res.isEmpty()?" ":res.join(" ");
 }
 
@@ -23,7 +27,7 @@ QVector<int> stringToList(QString str)
 {
 	QStringList strs = str.split(" ");
 	QVector<int> res;
-	foreach (auto i, strs) if (!i.isEmpty()) res.append(i.toInt());
+	for (auto i: strs) if (!i.isEmpty()) res.append(i.toInt());
 	return res;
 }
 
@@ -287,11 +291,21 @@ void AppState::loadState(QVariantMap state)
 	next(Nowhere);
 }
 
+void AppState::addWord(QJsonObject obj, int id)
+{
+	if (!obj.contains("w")) return;
+	if (!obj.value("w").isString()) return;
+	if (!obj.contains("t")) return;
+	if (!obj.value("t").isString()) return;
+	Word word(obj.value("w").toString(), obj.value("t").toString());
+	addWord(word, id);
+}
+
 void AppState::addWord(Word word, int id)
 {
 	if (id == -1)
 		while (m_words.contains(++id)) {}
-	//qDebug() << "Add word" << id;
+	qDebug() << "Add word" << id << word.dump();
 	m_words[id] = word;
 
 }
@@ -334,6 +348,86 @@ void AppState::populateFile(QString filename)
 		Word word(list[0], list[1]);
 		if (list.size() > 2) word.repeats = list[2].toInt();
 		addWord(word);
+	}
+}
+
+void AppState::populateSteal(QString filename)
+{
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "Error file" << file.errorString();
+		return;
+	}
+	QTextStream out(&file);
+	QString json;
+	QStack<QChar> brack;
+	bool isQuoted = false;
+	bool isJson = false;
+	while (!out.atEnd()) {
+		QChar ch;
+		out >> ch;
+		if (isJson) {
+			if (isQuoted) {
+				QChar pair = brack.top();
+				if (ch == pair) {
+					isQuoted = false;
+					brack.pop();
+				}
+			} else if (ch == QChar('[')) {
+				brack.push(ch);
+			} else if (ch == QChar('{')) {
+				brack.push(ch);
+			} else if (ch == QChar(']')) {
+				if (brack.pop() != QChar('[')) {
+					// syntax sh#t
+					json = "";
+					isJson = false;
+					continue;
+				}
+				if (brack.isEmpty()) {
+					isJson = false;
+				}
+			} else if (ch == QChar('}')) {
+				if (brack.pop() != QChar('{')) {
+					// syntax sh#t
+					json = "";
+					isJson = false;
+					continue;
+				}
+				if (brack.isEmpty()) {
+					isJson = false;
+				}
+			} else if (ch == QChar('"')) {
+				brack.push(ch);
+				isQuoted = true;
+			} else if (ch == QChar('\'')) {
+				brack.push(ch);
+				isQuoted = true;
+			}
+		} else {
+			if (ch == QChar('[') || ch == QChar('{')) {
+				isJson = true;
+				brack.push(ch);
+			} else {
+				// skip this shit
+				continue;
+			}
+		}
+		json += ch;
+		if (!isJson) {
+			QJsonParseError err;
+			QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8(), &err);
+			json = "";
+			if (err.error != QJsonParseError::NoError)
+				continue;
+			if (doc.isArray()) {
+				QJsonArray arr = doc.array();
+				for (auto elem: arr)
+					if (elem.isObject())
+						addWord(elem.toObject());
+			} else if (doc.isObject())
+				addWord(doc.object());
+		}
 	}
 }
 

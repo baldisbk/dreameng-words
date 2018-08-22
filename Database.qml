@@ -23,7 +23,7 @@ QtObject {
 
 	function fromdemo() {state.populateDemo(); db.transaction(_storeWords)}
 	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords); dump()}
-	function fromstolen(path) {state.populateFile(path); db.transaction(_storeWords); dump()}
+	function fromstolen(path) {state.populateSteal(path); db.transaction(_storeWords); dump()}
 
 	function _dump(tx) {
 		var i

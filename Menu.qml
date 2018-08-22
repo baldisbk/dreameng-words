@@ -5,7 +5,7 @@ import QtQuick.Controls 2.3
 Item {
 	property Database db
 	FileDialog {
-		signal ready
+		property int mode: 0
 		id: fileopen
 		folder: shortcuts.documents
 		onAccepted: {
@@ -15,12 +15,20 @@ Item {
 				filePath = fileUrl.toString().slice(ind+3)
 			else
 				filePath = fileUrl.toString()
-			db.fromfiles(filePath)
+			switch (mode) {
+			case 1: db.fromfiles(filePath); break
+			case 2: db.fromstolen(filePath); break
+			default: break;
+			}
 		}
 	}
 	Rectangle {
 		id: first
 		height: parent.height/3
+		border {
+			color: "black"
+			width: 3
+		}
 		anchors {
 			top: parent.top
 			left: parent.left
@@ -37,6 +45,7 @@ Item {
 		MouseArea {
 			anchors.fill: parent
 			onClicked: {
+				fileopen.mode = 1
 				fileopen.open()
 			}
 		}
@@ -44,6 +53,10 @@ Item {
 	Rectangle {
 		id: second
 		height: parent.height/3
+		border {
+			color: "black"
+			width: 3
+		}
 		anchors {
 			top: first.bottom
 			left: parent.left
@@ -51,7 +64,7 @@ Item {
 		}
 		Label{
 			anchors.fill: parent
-			text: "Dump"
+			text: "Load stolen"
 			font.pointSize: 30
 			font.bold: true
 			horizontalAlignment: Text.AlignHCenter
@@ -59,7 +72,10 @@ Item {
 		}
 		MouseArea {
 			anchors.fill: parent
-			onClicked: db.dump()
+			onClicked: {
+				fileopen.mode = 2
+				fileopen.open()
+			}
 		}
 	}
 	Rectangle {

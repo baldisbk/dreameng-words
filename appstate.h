@@ -39,6 +39,7 @@ public:
 	// initial list fill
 	Q_INVOKABLE void populateDemo();
 	Q_INVOKABLE void populateFile(QString filename);
+	Q_INVOKABLE void populateSteal(QString filename);
 	// for DB storage
 	Q_INVOKABLE QList<int> wordIndexes() const;
 	Q_INVOKABLE QVariantMap wordContents(int index) const;
@@ -50,6 +51,7 @@ public:
 	Q_INVOKABLE void addWord(QVariantMap word);
 	Q_INVOKABLE void loadState(QVariantMap state);
 
+	void addWord(QJsonObject doc, int id = -1);
 	void addWord(Word word, int id = -1);
 
 	Settings* settings();
