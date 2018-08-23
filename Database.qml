@@ -109,7 +109,7 @@ QtObject {
 		for (var i=0; i<words.length; i++) {
 			var word = state.wordContents(words[i])
 			tx.executeSql(
-				'INSERT INTO WordsV1('+
+				'INSERT OR IGNORE INTO WordsV1('+
 					'uid, word, translation, '+
 					'repeats, errors, last, age, speed) '+
 				'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
