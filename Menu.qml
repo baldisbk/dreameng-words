@@ -22,17 +22,18 @@ Item {
 			}
 		}
 	}
+	Column {
+		property int childHeight: (height-spacing*(children.length-1))/children.length
+		spacing: 20
+		anchors.fill: parent
 	Rectangle {
 		id: first
-		height: parent.height/3
+		height: parent.childHeight
+		width: parent.width
+		radius: 10
 		border {
 			color: "black"
 			width: 3
-		}
-		anchors {
-			top: parent.top
-			left: parent.left
-			right: parent.right
 		}
 		Label{
 			anchors.fill: parent
@@ -52,15 +53,12 @@ Item {
 	}
 	Rectangle {
 		id: second
-		height: parent.height/3
+		height: parent.childHeight
+		width: parent.width
+		radius: 10
 		border {
 			color: "black"
 			width: 3
-		}
-		anchors {
-			top: first.bottom
-			left: parent.left
-			right: parent.right
 		}
 		Label{
 			anchors.fill: parent
@@ -80,15 +78,25 @@ Item {
 	}
 	Rectangle {
 		id: third
-		height: parent.height/3
-		color: "#003f3f"
-		anchors {
-			top: second.bottom
-			left: parent.left
-			right: parent.right
+		height: parent.childHeight
+		width: parent.width
+		radius: 10
+		border {
+			color: "black"
+			width: 3
+		}
+		Label{
+			anchors.fill: parent
+			text: "Dictionaries"
+			font.pointSize: 30
+			font.bold: true
+			horizontalAlignment: Text.AlignHCenter
+			verticalAlignment: Text.AlignVCenter
 		}
 		MouseArea {
 			anchors.fill: parent
+			onClicked: {}
 		}
+	}
 	}
 }
