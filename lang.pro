@@ -36,3 +36,7 @@ HEADERS += \
     settings.h \
     pagestate.h \
     word.h
+
+DISTFILES += \
+    sample.js \
+    words2.csv
