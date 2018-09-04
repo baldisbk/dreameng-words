@@ -29,17 +29,19 @@ public:
 	Q_PROPERTY(PageState* left READ left)
 	Q_PROPERTY(PageState* right READ right)
 	Q_PROPERTY(PageState* page READ page)
+	Q_PROPERTY(QString dictionary READ dictionary WRITE setDictionary NOTIFY dictionaryChanged)
 
 	Q_PROPERTY(Settings* settings READ settings CONSTANT)
 
 	// navigate
 	Q_INVOKABLE void next(Direction dir);
 	Q_INVOKABLE void init();
+	Q_INVOKABLE QStringList dictionaries() const;
 
 	// initial list fill
-	Q_INVOKABLE void populateDemo();
-	Q_INVOKABLE void populateFile(QString filename);
-	Q_INVOKABLE void populateSteal(QString filename);
+	Q_INVOKABLE QString populateDemo();
+	Q_INVOKABLE QString populateFile(QString filename);
+	Q_INVOKABLE QString populateSteal(QString filename);
 	// for DB storage
 	Q_INVOKABLE QList<int> wordIndexes() const;
 	Q_INVOKABLE QVariantMap wordContents(int index) const;
@@ -62,14 +64,19 @@ public:
 	PageState* right() const;
 	PageState *page() const;
 
+	QString dictionary() const;
+
 public slots:
 	void setUpper(PageState *upper);
 	void setLower(PageState* lower);
 	void setLeft(PageState *left);
 	void setRight(PageState* right);
 
+	void setDictionary(QString dictionary);
+
 signals:
 	void saveWords();
+	void dictionaryChanged(QString dictionary);
 
 private:
 	void flipWord(bool ok);
@@ -96,7 +103,11 @@ private:
 
 	void dump(QString prefix);
 
-	QMap<int, Word> m_words;
+	typedef QMap<int, Word> Dictionary;
+
+	Dictionary m_words;
+	QMap<QString, Dictionary> m_dicts;
+	QSet<int> m_ids;
 
 	QMap<int, Word> m_changedWords;	// selected words
 	QVector<int> m_selectedWords;	// indexes of them, shuffled
@@ -115,6 +126,7 @@ private:
 	int m_lastElapsed;
 	int m_totalElapsed;
 	int m_prevTotalElapsed;
+	QString m_dictionary;
 };
 
 #endif // APPSTATE_H

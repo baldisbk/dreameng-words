@@ -246,6 +246,11 @@ void AppState::init()
 	next(Nowhere);
 }
 
+QStringList AppState::dictionaries() const
+{
+	return m_dicts.keys();
+}
+
 void AppState::addWord(QVariantMap word)
 {
 	int id = word.value("uid").toInt();
@@ -283,6 +288,8 @@ void AppState::loadState(QVariantMap state)
 	m_totalElapsed = state["runtime"].toInt();
 	m_prevTotalElapsed = state["prevruntime"].toInt();
 	QStringList list = state["changed"].toString().split(" ");
+	m_dictionary = state["dict"].toString();
+	m_words = m_dicts[m_dictionary];
 	int i = 0;
 	for(int w: m_selectedWords) {
 		m_changedWords[w] = m_words[w];
@@ -303,15 +310,21 @@ void AppState::addWord(QJsonObject obj, int id)
 
 void AppState::addWord(Word word, int id)
 {
+	QString dict = word.dict;
+	if (dict.isEmpty())
+		dict = word.dict = m_dictionary;
 	if (id == -1)
-		while (m_words.contains(++id)) {}
+		while (m_ids.contains(++id)) {}
 	qDebug() << "Add word" << id << word.dump();
-	m_words[id] = word;
-
+	m_dicts[dict][id] = word;
+	if (dict == m_dictionary)
+		m_words[id] = word;
+	m_ids.insert(id);
 }
 
-void AppState::populateDemo()
+QString AppState::populateDemo()
 {
+	setDictionary("DEMO");
 	addWord(Word("Zero", "Null"));
 	addWord(Word("One", "Jeden"));
 	addWord(Word("Two", "Dva"));
@@ -333,15 +346,17 @@ void AppState::populateDemo()
 	addWord(Word("Eighteen", "Osmnact"));
 	addWord(Word("Nineteen", "Devetnact"));
 	addWord(Word("Twenty", "Dvacet"));
+	return dictionary();
 }
 
-void AppState::populateFile(QString filename)
+QString AppState::populateFile(QString filename)
 {
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "Error file" << file.errorString();
-		return;
+		return QString();
 	}
+	setDictionary(filename);
 	while (!file.atEnd()) {
 		QStringList list = QString(file.readLine()).trimmed().split(";");
 		if (list.size() < 2) continue;
@@ -349,17 +364,19 @@ void AppState::populateFile(QString filename)
 		if (list.size() > 2) word.repeats = list[2].toInt();
 		addWord(word);
 	}
+	return dictionary();
 }
 
-void AppState::populateSteal(QString filename)
+QString AppState::populateSteal(QString filename)
 {
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		qDebug() << "Error file" << file.errorString();
-		return;
+		return QString();
 	}
 	QTextStream out(&file);
 	QString json;
+	setDictionary(filename);	// TODO
 	QStack<QChar> brack;
 	bool isQuoted = false;
 	bool isJson = false;
@@ -429,6 +446,7 @@ void AppState::populateSteal(QString filename)
 				addWord(doc.object());
 		}
 	}
+	return dictionary();
 }
 
 QList<int> AppState::wordIndexes() const
@@ -475,6 +493,7 @@ QVariantMap AppState::stateContents() const
 	res["changed"] = ch.join(" ");
 	res["runtime"] = m_totalElapsed;
 	res["prevruntime"] = m_prevTotalElapsed;
+	res["dict"] = m_dictionary;
 	return res;
 }
 
@@ -483,6 +502,8 @@ void AppState::clearWords()
 	m_words.clear();
 	m_selectedWords.clear();
 	m_errorWords.clear();
+	m_changedWords.clear();
+	m_currentWord = -1;
 }
 
 Settings *AppState::settings()
@@ -515,6 +536,11 @@ PageState *AppState::page() const
 	return m_page;
 }
 
+QString AppState::dictionary() const
+{
+	return m_dictionary;
+}
+
 void AppState::setUpper(PageState *upper)
 {
 	if (m_upper) delete m_upper;
@@ -537,6 +563,17 @@ void AppState::setRight(PageState *right)
 {
 	if (m_right) delete m_right;
 	m_right = right;
+}
+
+void AppState::setDictionary(QString dictionary)
+{
+	if (m_dictionary == dictionary)
+		return;
+
+	clearWords();
+	m_dictionary = dictionary;
+	m_words = m_dicts[m_dictionary];
+	emit dictionaryChanged(m_dictionary);
 }
 
 void AppState::flipWord(bool ok)

@@ -45,6 +45,7 @@ QtObject {
 				w.rows.item(i).uid,
 				w.rows.item(i).word,
 				w.rows.item(i).translation,
+				w.rows.item(i).dict,
 				w.rows.item(i).repeats,
 				w.rows.item(i).errors,
 				w.rows.item(i).last,
@@ -70,10 +71,10 @@ QtObject {
 		tx.executeSql(
 			'INSERT INTO StateV1('+
 				'state, statectx, changed, selected, errors, current, '+
-				'runtime, prevruntime) '+
-			'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+				'runtime, prevruntime, dict) '+
+			'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
 			[st.state, st.statectx, st.changed, st.selected,
-			 st.errors, st.current, st.runtime, st.prevruntime])
+			 st.errors, st.current, st.runtime, st.prevruntime, st.dict])
 	}
 
 	function _storeCurrent(tx) {
@@ -83,11 +84,11 @@ QtObject {
 			var word = state.changedContents(words[i])
 			tx.executeSql(
 				'UPDATE WordsV1 SET '+
-					'word = ?, translation = ?, '+
+					'word = ?, translation = ?, dict = ?, '+
 					'repeats = ?, errors = ?, '+
 					'last = ?, age = ?, speed = ? '+
 				'WHERE uid = ?',
-				[word.word, word.translation,
+				[word.word, word.translation, word.dict,
 				 word.repeats, word.errors,
 				 word.last, word.age, word.speed,
 				 words[i]])
@@ -110,10 +111,10 @@ QtObject {
 			var word = state.wordContents(words[i])
 			tx.executeSql(
 				'INSERT OR IGNORE INTO WordsV1('+
-					'uid, word, translation, '+
+					'uid, word, translation, dict, '+
 					'repeats, errors, last, age, speed) '+
-				'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-				[words[i], word.word, word.translation,
+				'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+				[words[i], word.word, word.translation, word.dict,
 				 word.repeats, word.errors, word.last, word.age, word.speed])
 		}
 	}
@@ -143,6 +144,7 @@ QtObject {
 				'uid INTEGER PRIMARY KEY AUTOINCREMENT,'+
 				'state INT,'+
 				'statectx STRING,'+
+				'dict TEXT,'+
 				'changed TEXT,'+
 				'selected TEXT,'+
 				'errors TEXT,'+
@@ -155,6 +157,7 @@ QtObject {
 				'uid INTEGER PRIMARY KEY AUTOINCREMENT,'+
 				'word TEXT,'+
 				'translation TEXT,'+
+				'dict TEXT,'+
 				'repeats INT,'+
 				'errors INT,'+
 				'last INT,'+
