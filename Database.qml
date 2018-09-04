@@ -134,7 +134,10 @@ QtObject {
 		if (res.rows.length !== 0)
 			ver = res.rows.item(0).version
 		if (ver != dbVer) {
-			tx.executeSql('INSERT INTO Version VALUES (?)', [dbVer])
+			if (ver == 0)
+				tx.executeSql('INSERT INTO Version VALUES (?)', [dbVer])
+			else
+				tx.executeSql('UPDATE Version SET version = ?', [dbVer])
 			tx.executeSql(
 				'CREATE TABLE StateV1('+
 				'uid INTEGER PRIMARY KEY AUTOINCREMENT,'+
@@ -161,10 +164,13 @@ QtObject {
 
 			// actually update...
 
-			switch(ver) {
-			case 0:
-				break;
-			default:;
+			for (var i = ver; i<dbVer; ++i) {
+				switch(i) {
+				case 0:
+					// insert into v1 select from v0, drop v0
+					break;
+				default: break;
+				}
 			}
 		}
 	}
