@@ -22,6 +22,51 @@ Item {
 			}
 		}
 	}
+	Dialog {
+		property string dict
+		property var dictList
+		id: dictionaries
+		width: parent.width
+		height: parent.height
+		contentItem: ListView {
+			id: dictView
+			width: parent.width
+			height: parent.height
+			delegate: Rectangle {
+				id: itemDelegate
+				height: 100
+				radius: 10
+				border {
+					color: "black"
+					width: 3
+				}
+				width: parent.width
+				Label{
+					anchors.fill: parent
+					text: dictionaries.dictList[index]
+					font.pointSize: 30
+					font.bold: true
+					horizontalAlignment: Text.AlignHCenter
+					verticalAlignment: Text.AlignVCenter
+				}
+				MouseArea {
+					anchors.fill: parent
+					onClicked: {
+						dictionaries.dict = dictionaries.dictList[index]
+						dictionaries.accept()
+					}
+				}
+			}
+		}
+		onVisibleChanged: {
+			if (visible) dictList = db.state.dictionaries()
+			dictView.model = dictList.length
+		}
+		onAccepted: {
+			db.state.setDictionary(dict)
+		}
+	}
+
 	Column {
 		property int childHeight: (height-spacing*(children.length-1))/children.length
 		spacing: 20
@@ -95,7 +140,7 @@ Item {
 		}
 		MouseArea {
 			anchors.fill: parent
-			onClicked: {}
+			onClicked: {dictionaries.open()}
 		}
 	}
 	}
