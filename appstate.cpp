@@ -449,6 +449,11 @@ QString AppState::populateSteal(QString filename)
 	return dictionary();
 }
 
+QStringList AppState::wordFields() const
+{
+	return Word::keys();
+}
+
 QList<int> AppState::wordIndexes() const
 {
 	return m_words.keys();
@@ -475,6 +480,20 @@ QVariantMap AppState::changedContents(int index) const
 	const Word w = m_changedWords[index];
 	QVariantMap res = w.store();
 	return res;
+}
+
+QStringList AppState::stateFields() const
+{
+	return QStringList()
+		<< "state"
+		<< "statectx"
+		<< "selected"
+		<< "errors"
+		<< "current"
+		<< "changed"
+		<< "runtime"
+		<< "prevruntime"
+		<< "dict";
 }
 
 QVariantMap AppState::stateContents() const

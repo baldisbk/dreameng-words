@@ -14,6 +14,17 @@ struct Word
 		age(0), speed(0)
 	{}
 
+	static QStringList keys() {
+		return QStringList()
+			<< "word"
+			<< "translation"
+			<< "repeats"
+			<< "errors"
+			<< "last"
+			<< "age"
+			<< "speed"
+			<< "dict";
+	}
 	QVariantMap store() const
 	{
 		QVariantMap res;

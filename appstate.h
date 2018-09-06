@@ -42,6 +42,9 @@ public:
 	Q_INVOKABLE QString populateDemo();
 	Q_INVOKABLE QString populateFile(QString filename);
 	Q_INVOKABLE QString populateSteal(QString filename);
+	// for DB create
+	Q_INVOKABLE QStringList wordFields() const;
+	Q_INVOKABLE QStringList stateFields() const;
 	// for DB storage
 	Q_INVOKABLE QList<int> wordIndexes() const;
 	Q_INVOKABLE QVariantMap wordContents(int index) const;

@@ -67,7 +67,6 @@ QtObject {
 			values.push(st[val])
 		}
 		var exp = 'INSERT INTO StateV1('+fields+') VALUES ('+ques+')'
-		console.log(exp, values)
 		tx.executeSql(exp, values)
 	}
 
@@ -85,7 +84,6 @@ QtObject {
 			}
 			values.push(words[i])
 			var exp = 'UPDATE WordsV1 SET '+fields+' WHERE uid = ?'
-			console.log(exp)
 			tx.executeSql(exp, values)
 		}
 	}
@@ -137,31 +135,22 @@ QtObject {
 				tx.executeSql('INSERT INTO Version VALUES (?)', [dbVer])
 			else
 				tx.executeSql('UPDATE Version SET version = ?', [dbVer])
+			var stateFld = state.stateFields()
+			var stateFldList = ""
+			for (var sfld in stateFld)
+				stateFldList += ", "+stateFld[sfld]+" TEXT"
 			tx.executeSql(
 				'CREATE TABLE StateV1('+
-				'uid INTEGER PRIMARY KEY AUTOINCREMENT,'+
-				'state INT,'+
-				'statectx STRING,'+
-				'dict TEXT,'+
-				'changed TEXT,'+
-				'selected TEXT,'+
-				'errors TEXT,'+
-				'current INT,'+
-				'runtime INT,'+
-				'prevruntime INT'+
-				')')
+				'uid INTEGER PRIMARY KEY AUTOINCREMENT'+
+				stateFldList+')')
+			var wordFld = state.wordFields()
+			var wordFldList = ""
+			for (var wfld in wordFld)
+				wordFldList += ", "+wordFld[wfld]+" TEXT"
 			tx.executeSql(
 				'CREATE TABLE WordsV1('+
-				'uid INTEGER PRIMARY KEY AUTOINCREMENT,'+
-				'word TEXT,'+
-				'translation TEXT,'+
-				'dict TEXT,'+
-				'repeats INT,'+
-				'errors INT,'+
-				'last INT,'+
-				'age INT,'+
-				'speed INT'+
-				')')
+				'uid INTEGER PRIMARY KEY AUTOINCREMENT'+
+				wordFldList+')')
 
 			// actually update...
 
