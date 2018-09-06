@@ -460,7 +460,6 @@ QVariantMap AppState::wordContents(int index) const
 		return QVariantMap();
 	const Word w = m_words[index];
 	QVariantMap res = w.store();
-	res["uid"] = index;
 	return res;
 }
 
@@ -475,7 +474,6 @@ QVariantMap AppState::changedContents(int index) const
 		return QVariantMap();
 	const Word w = m_changedWords[index];
 	QVariantMap res = w.store();
-	res["uid"] = index;
 	return res;
 }
 

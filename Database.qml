@@ -32,25 +32,10 @@ QtObject {
 		console.log('======== Database ========')
 		console.log('-------- State --------')
 		for (i = 0; i < st.rows.length; ++i)
-			console.log(
-				st.rows.item(i).state,
-				st.rows.item(i).statectx,
-				st.rows.item(i).changed,
-				st.rows.item(i).selected,
-				st.rows.item(i).errors,
-				st.rows.item(i).current)
+			console.log(st.rows.item(i))
 		console.log('-------- Words --------')
 		for (i = 0; i < w.rows.length; ++i)
-			console.log(
-				w.rows.item(i).uid,
-				w.rows.item(i).word,
-				w.rows.item(i).translation,
-				w.rows.item(i).dict,
-				w.rows.item(i).repeats,
-				w.rows.item(i).errors,
-				w.rows.item(i).last,
-				w.rows.item(i).age,
-				w.rows.item(i).speed)
+			console.log(w.rows.item(i))
 		console.log('======== End dump ========')
 	}
 
@@ -68,13 +53,22 @@ QtObject {
 		//console.log('======== Store state ========')
 		tx.executeSql('DELETE FROM StateV1')
 		var st = state.stateContents()
-		tx.executeSql(
-			'INSERT INTO StateV1('+
-				'state, statectx, changed, selected, errors, current, '+
-				'runtime, prevruntime, dict) '+
-			'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-			[st.state, st.statectx, st.changed, st.selected,
-			 st.errors, st.current, st.runtime, st.prevruntime, st.dict])
+		var fields = ""
+		var ques = ""
+		var values = []
+		for (var val in st) {
+			if (values.length != 0) {
+				fields += ", "
+				ques += ", "
+			}
+
+			fields += val
+			ques += "?"
+			values.push(st[val])
+		}
+		var exp = 'INSERT INTO StateV1('+fields+') VALUES ('+ques+')'
+		console.log(exp, values)
+		tx.executeSql(exp, values)
 	}
 
 	function _storeCurrent(tx) {
@@ -82,16 +76,17 @@ QtObject {
 		var words = state.changedIndexes()
 		for (var i=0; i<words.length; i++) {
 			var word = state.changedContents(words[i])
-			tx.executeSql(
-				'UPDATE WordsV1 SET '+
-					'word = ?, translation = ?, dict = ?, '+
-					'repeats = ?, errors = ?, '+
-					'last = ?, age = ?, speed = ? '+
-				'WHERE uid = ?',
-				[word.word, word.translation, word.dict,
-				 word.repeats, word.errors,
-				 word.last, word.age, word.speed,
-				 words[i]])
+			var fields = ""
+			var values = []
+			for (var val in word) {
+				if (fields.length != 0) fields += ", "
+				fields += val + " = ?"
+				values.push(word[val])
+			}
+			values.push(words[i])
+			var exp = 'UPDATE WordsV1 SET '+fields+' WHERE uid = ?'
+			console.log(exp)
+			tx.executeSql(exp, values)
 		}
 	}
 
@@ -109,13 +104,16 @@ QtObject {
 		var words = state.wordIndexes()
 		for (var i=0; i<words.length; i++) {
 			var word = state.wordContents(words[i])
-			tx.executeSql(
-				'INSERT OR IGNORE INTO WordsV1('+
-					'uid, word, translation, dict, '+
-					'repeats, errors, last, age, speed) '+
-				'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-				[words[i], word.word, word.translation, word.dict,
-				 word.repeats, word.errors, word.last, word.age, word.speed])
+			var fields = "uid"
+			var ques = "?"
+			var values = [words[i]]
+			for (var val in word) {
+				fields += ", " + val
+				ques += ", ?"
+				values.push(word[val])
+			}
+			var exp = 'INSERT OR IGNORE INTO WordsV1('+fields+') VALUES ('+ques+')'
+			tx.executeSql(exp, values)
 		}
 	}
 
