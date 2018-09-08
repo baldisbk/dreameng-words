@@ -11,7 +11,6 @@ QtObject {
 	function init() {
 		db = LocalStorage.openDatabaseSync("TmpDB", "1.0", "", 0);
 		db.transaction(_makedb)
-		dump()
 		db.readTransaction(_loadWords)
 		loadState()
 	}
@@ -22,8 +21,8 @@ QtObject {
 	function saveWords() {db.transaction(_storeCurrent)}
 
 	function fromdemo() {state.populateDemo(); db.transaction(_storeWords)}
-	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords); dump()}
-	function fromstolen(path) {state.populateSteal(path); db.transaction(_storeWords); dump()}
+	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords)}
+	function fromstolen(path) {state.populateSteal(path); db.transaction(_storeWords)}
 
 	function _dump(tx) {
 		var i

@@ -376,10 +376,12 @@ QString AppState::populateSteal(QString filename)
 	}
 	QTextStream out(&file);
 	QString json;
-	setDictionary(filename);	// TODO
+	QString word;
 	QStack<QChar> brack;
+	bool hasDict = false;
 	bool isQuoted = false;
 	bool isJson = false;
+	bool expectDict = false;
 	while (!out.atEnd()) {
 		QChar ch;
 		out >> ch;
@@ -414,19 +416,45 @@ QString AppState::populateSteal(QString filename)
 				if (brack.isEmpty()) {
 					isJson = false;
 				}
-			} else if (ch == QChar('"')) {
-				brack.push(ch);
-				isQuoted = true;
-			} else if (ch == QChar('\'')) {
+			} else if (ch == QChar('"') || ch == QChar('\'')) {
 				brack.push(ch);
 				isQuoted = true;
 			}
+		} else if (isQuoted) {
+			if (ch == QChar('"') || ch == QChar('\'')) {
+				QChar pair = brack.top();
+				if (ch == pair) {
+					isQuoted = false;
+					brack.pop();
+				}
+			}
+			if (expectDict) {
+				if (isQuoted) {
+					word += ch;
+				} else {
+					hasDict = true;
+					setDictionary(word);
+					expectDict = false;
+					word = "";
+				}
+			}
+			continue;
 		} else {
 			if (ch == QChar('[') || ch == QChar('{')) {
 				isJson = true;
 				brack.push(ch);
+			} else if (ch == QChar('"') || ch == QChar('\'')) {
+				brack.push(ch);
+				isQuoted = true;
+				continue;
+			} else if (ch.isLetterOrNumber() || ch == QChar('_')) {
+				word += ch;
+				continue;
 			} else {
-				// skip this shit
+				if (word == "course_name") {
+					expectDict = true;
+				}
+				word = "";
 				continue;
 			}
 		}
@@ -440,10 +468,16 @@ QString AppState::populateSteal(QString filename)
 			if (doc.isArray()) {
 				QJsonArray arr = doc.array();
 				for (auto elem: arr)
-					if (elem.isObject())
+					if (elem.isObject()) {
+						if (!hasDict)
+							setDictionary(filename);
 						addWord(elem.toObject());
-			} else if (doc.isObject())
+					}
+			} else if (doc.isObject()) {
+				if (!hasDict)
+					setDictionary(filename);
 				addWord(doc.object());
+			}
 		}
 	}
 	return dictionary();
