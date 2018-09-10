@@ -71,77 +71,29 @@ Item {
 		property int childHeight: (height-spacing*(children.length-1))/children.length
 		spacing: 20
 		anchors.fill: parent
-	Rectangle {
-		id: first
-		height: parent.childHeight
-		width: parent.width
-		radius: 10
-		border {
-			color: "black"
-			width: 3
-		}
-		Label{
-			anchors.fill: parent
-			text: "Load file"
-			font.pointSize: 30
-			font.bold: true
-			horizontalAlignment: Text.AlignHCenter
-			verticalAlignment: Text.AlignVCenter
-		}
-		MouseArea {
-			anchors.fill: parent
+		MenuButton {
+			width: parent.width
+			height: parent.childHeight
+			caption: "Load file"
 			onClicked: {
 				fileopen.mode = 1
 				fileopen.open()
 			}
 		}
-	}
-	Rectangle {
-		id: second
-		height: parent.childHeight
-		width: parent.width
-		radius: 10
-		border {
-			color: "black"
-			width: 3
-		}
-		Label{
-			anchors.fill: parent
-			text: "Load stolen"
-			font.pointSize: 30
-			font.bold: true
-			horizontalAlignment: Text.AlignHCenter
-			verticalAlignment: Text.AlignVCenter
-		}
-		MouseArea {
-			anchors.fill: parent
+		MenuButton {
+			width: parent.width
+			height: parent.childHeight
+			caption: "Load stolen"
 			onClicked: {
 				fileopen.mode = 2
 				fileopen.open()
 			}
 		}
-	}
-	Rectangle {
-		id: third
-		height: parent.childHeight
-		width: parent.width
-		radius: 10
-		border {
-			color: "black"
-			width: 3
-		}
-		Label{
-			anchors.fill: parent
-			text: "Dictionaries"
-			font.pointSize: 30
-			font.bold: true
-			horizontalAlignment: Text.AlignHCenter
-			verticalAlignment: Text.AlignVCenter
-		}
-		MouseArea {
-			anchors.fill: parent
+		MenuButton {
+			width: parent.width
+			height: parent.childHeight
+			caption: "Dictionaries"
 			onClicked: {dictionaries.open()}
 		}
-	}
 	}
 }
