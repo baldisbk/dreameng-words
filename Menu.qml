@@ -64,6 +64,7 @@ Item {
 		}
 		onAccepted: {
 			db.state.setDictionary(dict)
+			db.saveState()
 		}
 	}
 

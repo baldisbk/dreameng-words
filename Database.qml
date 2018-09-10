@@ -20,9 +20,9 @@ QtObject {
 	function loadState() {db.readTransaction(_loadState)}
 	function saveWords() {db.transaction(_storeCurrent)}
 
-	function fromdemo() {state.populateDemo(); db.transaction(_storeWords)}
-	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords)}
-	function fromstolen(path) {state.populateSteal(path); db.transaction(_storeWords)}
+	function fromdemo() {state.populateDemo(); db.transaction(_storeWords);saveState()}
+	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords);saveState()}
+	function fromstolen(path) {state.populateSteal(path); db.transaction(_storeWords);saveState()}
 
 	function _dump(tx) {
 		var i
@@ -30,8 +30,14 @@ QtObject {
 		var w = tx.executeSql('SELECT * FROM WordsV1')
 		console.log('======== Database ========')
 		console.log('-------- State --------')
-		for (i = 0; i < st.rows.length; ++i)
-			console.log(st.rows.item(i))
+		for (i = 0; i < st.rows.length; ++i) {
+			var str = ""
+			for (var s in st.rows.item(i)) {
+				str += s+"="+st.rows.item(i)[s]+", "
+			}
+
+			console.log(str)
+		}
 		console.log('-------- Words --------')
 		for (i = 0; i < w.rows.length; ++i)
 			console.log(w.rows.item(i))
