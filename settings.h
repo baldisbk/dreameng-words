@@ -14,6 +14,7 @@ public:
 
 	int seqLength() const;
 	int seqNumber() const;
+	QString store() const;
 
 signals:
 	void seqLengthChanged(int seqLength);
@@ -22,6 +23,7 @@ signals:
 public slots:
 	void setSeqLength(int seqLength);
 	void setSeqNumber(int seqNumber);
+	void load(QString str);
 
 private:
 	int m_seqLength;

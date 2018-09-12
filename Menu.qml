@@ -68,6 +68,23 @@ Item {
 		}
 	}
 
+	Dialog {
+		id: settings
+		width: parent.width
+		height: parent.height
+		standardButtons: Dialog.Ok | Dialog.Cancel
+		contentItem: Column {
+			Label {text: "Words in serie"}
+			SpinBox {
+				id: spin
+				from: 1
+				to: 50
+				value: db.state.settings.seqLength
+			}
+		}
+		onAccepted: db.state.settings.setSeqLength(spin.value)
+	}
+
 	Column {
 		property int childHeight: (height-spacing*(children.length-1))/children.length
 		spacing: 20
@@ -95,6 +112,12 @@ Item {
 			height: parent.childHeight
 			caption: "Dictionaries"
 			onClicked: {dictionaries.open()}
+		}
+		MenuButton {
+			width: parent.width
+			height: parent.childHeight
+			caption: "Settings"
+			onClicked: {settings.open()}
 		}
 	}
 }

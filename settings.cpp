@@ -15,6 +15,11 @@ int Settings::seqNumber() const
 	return m_seqNumber;
 }
 
+QString Settings::store() const
+{
+	return QString::number(m_seqLength);
+}
+
 void Settings::setSeqLength(int seqLength)
 {
 	if (m_seqLength == seqLength)
@@ -31,4 +36,9 @@ void Settings::setSeqNumber(int seqNumber)
 
 	m_seqNumber = seqNumber;
 	emit seqNumberChanged(m_seqNumber);
+}
+
+void Settings::load(QString str)
+{
+	m_seqLength = str.toInt();
 }

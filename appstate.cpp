@@ -295,6 +295,7 @@ void AppState::loadState(QVariantMap state)
 		m_changedWords[w] = m_words[w];
 		m_changedWords[w].loadStats(list[i++]);
 	}
+	m_settings.load(state["settings"].toString());
 	next(Nowhere);
 }
 
@@ -527,7 +528,8 @@ QStringList AppState::stateFields() const
 		<< "changed"
 		<< "runtime"
 		<< "prevruntime"
-		<< "dict";
+		<< "dict"
+		<< "settings";
 }
 
 QVariantMap AppState::stateContents() const
@@ -545,6 +547,7 @@ QVariantMap AppState::stateContents() const
 	res["runtime"] = m_totalElapsed;
 	res["prevruntime"] = m_prevTotalElapsed;
 	res["dict"] = m_dictionary;
+	res["settings"] = m_settings.store();
 	return res;
 }
 
