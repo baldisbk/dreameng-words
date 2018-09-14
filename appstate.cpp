@@ -95,12 +95,47 @@ void AppState::next(Direction dir)
 	case PageState::Header:
 		if (dir == Nowhere) break;
 		switch(static_cast<StatState*>(page())->otherState()) {
-		case PageState::Learn: newLearn(); break;
-		case PageState::Check: newCheck(); break;
-		case PageState::Errors: newErrors(); break;
-		case PageState::Train: newTrain(); break;
-		case PageState::Repeat: newRepeat(); break;
-		default: break;
+		case PageState::Learn:
+			newLearn();
+			if (m_selectedWords.size() == 0) {
+				static_cast<StatState*>(page())->setDescription(
+					tr("No words to learn, get another dictionary"));
+			} else {
+				static_cast<StatState*>(page())->setDescription(
+					QString(tr("You gonna learn %1 new words")).
+						arg(m_selectedWords.size()));
+			}
+			break;
+		case PageState::Check:
+			newCheck();
+			break;
+		case PageState::Errors:
+			newErrors();
+			break;
+		case PageState::Train:
+			newTrain();
+			if (m_selectedWords.size() == 0) {
+				static_cast<StatState*>(page())->setDescription(
+					tr("No words to repeat, learn something first"));
+			} else {
+				static_cast<StatState*>(page())->setDescription(
+					QString(tr("You gonna repeat %1 words")).
+						arg(m_selectedWords.size()));
+			}
+			break;
+		case PageState::Repeat:
+			newRepeat();
+			if (m_selectedWords.size() == 0) {
+				static_cast<StatState*>(page())->setDescription(
+					tr("No words to remind, train first"));
+			} else {
+				static_cast<StatState*>(page())->setDescription(
+					QString(tr("You gonna remind %1 words")).
+						arg(m_selectedWords.size()));
+			}
+			break;
+		default:
+			break;
 		}
 		break;
 	case PageState::Footer: {
