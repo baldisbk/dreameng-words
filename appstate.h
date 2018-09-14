@@ -84,6 +84,8 @@ signals:
 private:
 	void flipWord(bool ok);
 	void showWord();
+	int prevTotalElapsed() const;
+	int currTotalElapsed() const;
 
 	Word curWord() const;
 	Word nextWord() const;
@@ -127,8 +129,6 @@ private:
 
 	QTime m_timer;
 	int m_lastElapsed;
-	int m_totalElapsed;
-	int m_prevTotalElapsed;
 	QString m_dictionary;
 };
 

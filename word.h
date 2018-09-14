@@ -11,7 +11,7 @@ struct Word
         Word(QString _word, QString _translation):
 		word(_word), translation(_translation),
 		repeats(0), errors(0),
-		age(0), speed(0)
+		age(0), speed(0), lastspeed(0)
 	{}
 
 	static QStringList keys() {
@@ -23,6 +23,7 @@ struct Word
 			<< "last"
 			<< "age"
 			<< "speed"
+			<< "lastspeed"
 			<< "dict";
 	}
 	QVariantMap store() const
@@ -35,16 +36,18 @@ struct Word
 		res["last"] = last.toSecsSinceEpoch();
 		res["age"] = age;
 		res["speed"] = speed;
+		res["lastspeed"] = lastspeed;
 		res["dict"] = dict;
 		return res;
 	}
 	QString storeStats() const {
-		return QString("%1;%2;%3;%4;%5").
+		return QString("%1;%2;%3;%4;%5;%6").
 			arg(repeats).
 			arg(errors).
 			arg(last.toSecsSinceEpoch()).
 			arg(age).
-			arg(speed);
+			arg(speed).
+			arg(lastspeed);
 	}
 	void loadStats(QString stats) {
 		QStringList list = stats.split(";");
@@ -54,6 +57,7 @@ struct Word
 		last.fromSecsSinceEpoch(list[2].toLongLong());
 		age = list[3].toDouble();
 		speed = list[4].toInt();
+		lastspeed = list[5].toInt();
 	}
 	void load(QVariantMap m) {
 		word = m.value("word").toString();
@@ -63,13 +67,14 @@ struct Word
 		last.fromSecsSinceEpoch(m.value("last", 0).toLongLong());
 		age = m.value("age", 0).toDouble();
 		speed = m.value("speed", 0).toInt();
+		lastspeed = m.value("lastspeed", 0).toInt();
 		dict = m.value("dict", 0).toString();
 	}
 	double errorRate() const {
 		return double(errors)/double(repeats);
 	}
 	QString dump() const {
-		return QString("%1/%2 %3/%4 %5(%6) S%7 @%8").
+		return QString("%1/%2 %3/%4 %5(%6) S%7/%8 @%9").
 			arg(word).
 			arg(translation).
 			arg(errors).
@@ -77,6 +82,7 @@ struct Word
 			arg(last.toString()).
 			arg(age).
 			arg(speed).
+			arg(lastspeed).
 			arg(dict);
 	}
 
@@ -86,7 +92,7 @@ struct Word
         int errors;
 	QDateTime last;
 	double age;
-	int speed;
+	int speed, lastspeed;
 	QString dict;
 };
 
