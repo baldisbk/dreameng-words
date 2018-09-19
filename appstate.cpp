@@ -8,13 +8,13 @@
 
 #include <QDebug>
 
-const int TrainThreshold = 7;
-const double OldRepeatCoeff = 0.8;
-const double TrainErrorRatio = 0.3;
-const double TrainErrorCost = 1.0;
-const double SecondToAgeCoeff = 1.0/10.0; //1.0/86400.0;
-const double BadSpeedRatio = 2.0;
-const double BadSpeedCost = 1.0;
+const int TrainThreshold = 7;		// "days" for Train mode become Repeat
+const double OldRepeatCoeff = 0.8;	// "forgetting" of repeats and errors num in Repeat mode
+const double TrainErrorRatio = 0.3;	// drop mode to Train if error rate is more
+const double TrainErrorCost = 1.0;	// age reducing coeff for error rate
+const double SecToAgeCoeff = 1.0/86400;	// second/"day"
+const double BadSpeedRatio = 2.0;	// if new speed if this times more, it's considered bad
+const double BadSpeedCost = 1.0;	// age reducing coeff for bad speed
 
 QString listToString(QVector<int> list)
 {
@@ -671,7 +671,7 @@ void AppState::flipWord(bool ok)
 	int newspeed = w.speed + (m_lastElapsed-w.speed)/(w.repeats/2+1);
 	w.lastspeed = m_lastElapsed;
 	++w.repeats;
-	double since = double(w.last.secsTo(QDateTime().currentDateTime()))*SecondToAgeCoeff;
+	double since = double(w.last.secsTo(QDateTime().currentDateTime()))*SecToAgeCoeff;
 	w.last = QDateTime().currentDateTime();
 	if (!ok) {
 		++w.errors;
