@@ -42,18 +42,46 @@ Item {
 				}
 				width: parent.width
 				Label{
-					anchors.fill: parent
+					anchors {
+						bottom: parent.bottom
+						top: parent.top
+						right: parent.right
+					}
+					id: dellabel
+					width: height
+					text: "X"
+					font.pointSize: 30
+					font.bold: true
+					color: "red"
+					horizontalAlignment: Text.AlignHCenter
+					verticalAlignment: Text.AlignVCenter
+					MouseArea {
+						anchors.fill: parent
+						onClicked: {
+							db.rmDict(dictionaries.dictList[index])
+							dictionaries.dictList = db.state.dictionaries()
+							dictView.model = dictionaries.dictList.length
+						}
+					}
+				}
+				Label{
+					anchors {
+						bottom: parent.bottom
+						top: parent.top
+						left: parent.left
+						right: dellabel.left
+					}
 					text: dictionaries.dictList[index]
 					font.pointSize: 30
 					font.bold: true
 					horizontalAlignment: Text.AlignHCenter
 					verticalAlignment: Text.AlignVCenter
-				}
-				MouseArea {
-					anchors.fill: parent
-					onClicked: {
-						dictionaries.dict = dictionaries.dictList[index]
-						dictionaries.accept()
+					MouseArea {
+						anchors.fill: parent
+						onClicked: {
+							dictionaries.dict = dictionaries.dictList[index]
+							dictionaries.accept()
+						}
 					}
 				}
 			}

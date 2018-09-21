@@ -51,6 +51,7 @@ public:
 	Q_INVOKABLE QList<int> changedIndexes() const;
 	Q_INVOKABLE QVariantMap changedContents(int index) const;
 	Q_INVOKABLE QVariantMap stateContents() const;
+	Q_INVOKABLE void dropDictionary(QString dict);
 	// for DB load
 	Q_INVOKABLE void clearWords();
 	Q_INVOKABLE void addWord(QVariantMap word);

@@ -581,6 +581,18 @@ QVariantMap AppState::stateContents() const
 	return res;
 }
 
+void AppState::dropDictionary(QString dict)
+{
+	if (!m_dicts.contains(dict)) {
+		return;
+	}
+	m_dicts.remove(dict);
+	if (m_dicts.isEmpty())
+		m_dicts.insert(QString(), Dictionary());
+	if (m_dictionary == dict)
+		setDictionary(m_dicts.firstKey());
+}
+
 void AppState::clearWords()
 {
 	m_words.clear();
@@ -656,6 +668,8 @@ void AppState::setDictionary(QString dictionary)
 
 	clearWords();
 	m_dictionary = dictionary;
+	if (m_dicts.size() == 1 && m_dicts.firstKey().isEmpty())
+		m_dicts.clear();
 	m_words = m_dicts[m_dictionary];
 	emit dictionaryChanged(m_dictionary);
 }

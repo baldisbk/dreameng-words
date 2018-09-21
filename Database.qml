@@ -8,6 +8,8 @@ QtObject {
 	property var db
 	property int dbVer: 1
 
+	property string tmpDict
+
 	function init() {
 		db = LocalStorage.openDatabaseSync("TmpDB", "1.0", "", 0);
 		db.transaction(_makedb)
@@ -23,6 +25,16 @@ QtObject {
 	function fromdemo() {state.populateDemo(); db.transaction(_storeWords);saveState()}
 	function fromfiles(path) {state.populateFile(path); db.transaction(_storeWords);saveState()}
 	function fromstolen(path) {state.populateSteal(path); db.transaction(_storeWords);saveState()}
+
+	function rmDict(dict) {
+		var olddict = state.dictionary
+		state.setDictionary(dict)
+		tmpDict = dict
+		db.transaction(_rmWords)
+		state.dropDictionary(dict)
+		if (olddict !== dict)
+			state.setDictionary(olddict)
+	}
 
 	function _dump(tx) {
 		var i
@@ -126,6 +138,10 @@ QtObject {
 		for (var i = 0; i < res.rows.length; ++i) {
 			state.addWord(res.rows.item(i));
 		}
+	}
+
+	function _rmWords(tx) {
+		tx.executeSql('DELETE from WordsV1 WHERE dict = ?', [tmpDict])
 	}
 
 	function _makedb(tx) {
