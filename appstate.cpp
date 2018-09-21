@@ -211,7 +211,7 @@ void AppState::next(Direction dir)
 	case PageState::Train:
 	case PageState::Repeat:
 		setUpper(new PageState(PageState::Main));
-		if (canShowWordOnState(status))
+		if (!showWordOnState(status))
 			setLower(new WordState(status, curWord(), false));
 		else
 			setLower(new PageState(PageState::None));
@@ -762,12 +762,6 @@ bool AppState::isWordState(PageState::State state)
 bool AppState::showWordOnState(PageState::State state)
 {
 	return (state == PageState::Learn) || (state == PageState::Errors);
-}
-
-bool AppState::canShowWordOnState(PageState::State state)
-{
-	return !showWordOnState(state) &&
-	((state == PageState::Repeat) || (state == PageState::Train));
 }
 
 int rand(int size)

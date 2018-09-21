@@ -93,7 +93,6 @@ private:
 
 	static bool isWordState(PageState::State state);
 	static bool showWordOnState(PageState::State state);
-	static bool canShowWordOnState(PageState::State state);
 
 	// init modes
 	void newLearn();
