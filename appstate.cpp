@@ -31,6 +31,18 @@ QVector<int> stringToList(QString str)
 	return res;
 }
 
+QString AppState::dir2string(AppState::Direction d)
+{
+	switch (d) {
+	case Up: return "Up";
+	case Down: return "Down";
+	case Left: return "Left";
+	case Right: return "Right";
+	case Nowhere: return "Nowhere";
+	}
+	return QString();
+}
+
 AppState::AppState(QObject *parent) : QObject(parent),
 	m_upper(nullptr), m_lower(nullptr), m_left(nullptr), m_right(nullptr), m_page(nullptr)
 {
@@ -41,8 +53,8 @@ void AppState::next(Direction dir)
 {
 	dump("Before next");
 
-	int prevElapsed = m_lastElapsed;
-	m_lastElapsed = m_timer.restart();
+	m_lastElapsed = m_timer.restart() + m_prevElapsed;
+	m_prevElapsed = 0;
 
 	// actions & stats before
 	switch (page()->status()) {
@@ -57,7 +69,7 @@ void AppState::next(Direction dir)
 			flipWord(dir == Right);
 			break;
 		case Down:
-			m_lastElapsed += prevElapsed;
+			m_prevElapsed = m_lastElapsed;
 			break;
 		case Up:
 			cancel();
@@ -322,6 +334,8 @@ void AppState::loadState(QVariantMap state)
 	m_currentWord = state["current"].toInt();
 	QStringList list = state["changed"].toString().split(" ");
 	m_dictionary = state["dict"].toString();
+	m_lastElapsed = state["elapsed"].toInt();
+	m_prevElapsed = state["pelapsed"].toInt();
 	m_words = m_dicts[m_dictionary];
 	int i = 0;
 	for(int w: m_selectedWords) {
@@ -559,7 +573,8 @@ QStringList AppState::stateFields() const
 		<< "errors"
 		<< "current"
 		<< "changed"
-		<< "runtime"
+		<< "elapsed"
+		<< "pelapsed"
 		<< "dict"
 		<< "settings";
 }
@@ -576,6 +591,8 @@ QVariantMap AppState::stateContents() const
 	for(auto index: m_selectedWords)
 		ch.append(m_changedWords[index].storeStats());
 	res["changed"] = ch.join(" ");
+	res["elapsed"] = m_lastElapsed;
+	res["pelapsed"] = m_prevElapsed;
 	res["dict"] = m_dictionary;
 	res["settings"] = m_settings.store();
 	return res;

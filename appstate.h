@@ -21,6 +21,7 @@ public:
 		Right
 	};
 	Q_ENUM(Direction)
+	static QString dir2string(Direction d);
 
 	explicit AppState(QObject *parent = nullptr);
 
@@ -129,6 +130,7 @@ private:
 
 	QTime m_timer;
 	int m_lastElapsed;
+	int m_prevElapsed;
 	QString m_dictionary;
 };
 
