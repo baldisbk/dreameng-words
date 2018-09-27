@@ -8,6 +8,8 @@
 
 #include <QDebug>
 
+//#define DEBUG_DO_DUMP
+
 const int TrainThreshold = 7;		// "days" for Train mode become Repeat
 const double OldRepeatCoeff = 0.8;	// "forgetting" of repeats and errors num in Repeat mode
 const double TrainErrorRatio = 0.3;	// drop mode to Train if error rate is more
@@ -276,7 +278,7 @@ void AppState::next(Direction dir)
 	}
 //	case PageState::Ask:
 		// n/a
-		break;
+		// break;
 	default:
 		break;
 	}
@@ -821,11 +823,12 @@ void AppState::newTrain()
 	QVector<T> candidates;
 	candidates.reserve(m_words.size());
 	for (int i = 0; i < m_words.size(); ++i) {
-		if (m_words[i].repeats > 0 && m_words[i].age <= TrainThreshold)
+		if (m_words[i].repeats > 0 && m_words[i].age <= TrainThreshold) {
 			candidates.append(T(i, m_words[i].age));
+		}
 	}
 	std::sort(candidates.begin(), candidates.end(),
-		  [](const T& a, const T& b){return a.second>b.second;});
+		  [](const T& a, const T& b){return a.second<b.second;});
 	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
 		int newId = candidates[i].first;
 		m_selectedWords.append(newId);
@@ -883,8 +886,9 @@ void AppState::finish()
 {
 	emit saveWords();
 	qDebug() << "-- finish";
-	for (auto wi = m_changedWords.begin(); wi != m_changedWords.end(); ++wi)
+	for (auto wi = m_changedWords.begin(); wi != m_changedWords.end(); ++wi) {
 		m_words[wi.key()] = wi.value();
+	}
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
@@ -923,9 +927,9 @@ void AppState::shuffle(QVector<int> &list)
 	}
 }
 
+#ifdef DEBUG_DO_DUMP
 void AppState::dump(QString prefix)
 {
-	return;
 	qDebug() << prefix;
 	qDebug() << "\tpage:" << page()->dump();
 	qDebug() << "\tleft:" << (left()?left()->dump():"null");
@@ -937,3 +941,6 @@ void AppState::dump(QString prefix)
 		    arg(m_currentWord).arg(m_changedWords.size()).
 		    arg(m_selectedWords.size()).arg(m_errorWords.size());
 }
+#else
+void AppState::dump(QString) {}
+#endif
