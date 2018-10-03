@@ -17,6 +17,8 @@ const double TrainErrorCost = 1.0;	// age reducing coeff for error rate
 const double SecToAgeCoeff = 1.0/86400;	// second/"day"
 const double BadSpeedRatio = 2.0;	// if new speed if this times more, it's considered bad
 const double BadSpeedCost = 1.0;	// age reducing coeff for bad speed
+const int TrainElapsedRound = 3600;	// time from last repeat rounded
+const int TrainElapsedCoeff = 7;	// time from last repeat coeff
 
 QString listToString(QVector<int> list)
 {
@@ -824,7 +826,10 @@ void AppState::newTrain()
 	candidates.reserve(m_words.size());
 	for (int i = 0; i < m_words.size(); ++i) {
 		if (m_words[i].repeats > 0 && m_words[i].age <= TrainThreshold) {
-			candidates.append(T(i, m_words[i].age));
+//			candidates.append(T(i, m_words[i].age));
+			int elapsed = int(m_words[i].last.secsTo(QDateTime::currentDateTime())) /
+				TrainElapsedRound;
+			candidates.append(T(i,m_words[i].age - elapsed*TrainElapsedCoeff));
 		}
 	}
 	std::sort(candidates.begin(), candidates.end(),
@@ -851,10 +856,10 @@ void AppState::newRepeat()
 	candidates.reserve(m_words.size());
 	for (int i = 0; i < m_words.size(); ++i) {
 		if (m_words[i].repeats > 0 && m_words[i].age > TrainThreshold)
-			candidates.append(T(i, m_words[i].repeats - m_words[i].errors));
+			candidates.append(T(i, m_words[i].errorRate()));
 	}
 	std::sort(candidates.begin(), candidates.end(),
-		  [](const T& a, const T& b){return a.second<b.second;});
+		  [](const T& a, const T& b){return a.second>b.second;});
 	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
 		int newId = candidates[i].first;
 		m_selectedWords.append(newId);
