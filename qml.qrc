@@ -11,6 +11,9 @@
         <file>MenuButton.qml</file>
         <file>lang_en_US.qm</file>
         <file>lang_ru_RU.qm</file>
+        <file>SettingDialog.qml</file>
+        <file>DictsDialog.qml</file>
+        <file>OpenFileDialog.qml</file>
     </qresource>
     <qresource prefix="/tr"/>
     <qresource prefix="/tc"/>
