@@ -1,9 +1,12 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QTranslator>
 
 #include "settings.h"
 #include "appstate.h"
 #include "pagestate.h"
+
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +15,11 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("DreamENG WordLearn");
 
     QGuiApplication app(argc, argv);
+
+    QTranslator translator;
+    QString fn = QString(":/lang_%1.qm").arg(QLocale::system().name());
+    qDebug() << fn << translator.load(fn);
+    app.installTranslator(&translator);
 
     QQmlApplicationEngine engine;
     qmlRegisterType<Settings>("Settings", 1, 0, "Settings");

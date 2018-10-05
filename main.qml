@@ -68,41 +68,41 @@ ApplicationWindow {
 			page.transVisible = !state.wordOnly
 			break
 		case PageState.Footer:
-			page.headCap = "AGAIN?"
+			page.headCap = qsTr("AGAIN?")
 			page.smallCap = state.description
 			break
 		case PageState.Header:
 			switch (state.otherState) {
 			case PageState.Learn:
-				page.headCap = "LEARN"
+				page.headCap = qsTr("LEARN")
 				page.smallCap = state.description
 				break
 			case PageState.Check:
-				page.headCap = "CHECK"
+				page.headCap = qsTr("CHECK")
 				page.smallCap = state.description
 				break
 			case PageState.Errors:
-				page.headCap = "ERRORS"
+				page.headCap = qsTr("ERRORS")
 				page.smallCap = state.description
 				break
 			case PageState.Train:
-				page.headCap = "TRAIN"
+				page.headCap = qsTr("TRAIN")
 				page.smallCap = state.description
 				break
 			case PageState.Repeat:
-				page.headCap = "REPEAT"
+				page.headCap = qsTr("REPEAT")
 				page.smallCap = state.description
 				break
 			case PageState.Main:
-				page.headCap = "COMPLETE"
+				page.headCap = qsTr("COMPLETE")
 				page.smallCap = state.description
 				break
 			case PageState.Footer:
-				page.headCap = "AGAIN?"
+				page.headCap = qsTr("AGAIN?")
 				page.smallCap = state.description
 				break
 			default:
-				page.headCap = "UNEXPECTED! "+state.otherState
+				page.headCap = qsTr("UNEXPECTED! ")+state.otherState
 				page.smallCap = state.description
 				break
 			}

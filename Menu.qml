@@ -102,7 +102,7 @@ Item {
 		height: parent.height
 		standardButtons: Dialog.Ok | Dialog.Cancel
 		contentItem: Column {
-			Label {text: "Words in serie"}
+			Label {text: qsTr("Words in serie")}
 			SpinBox {
 				id: spin
 				from: 1
@@ -120,7 +120,7 @@ Item {
 		MenuButton {
 			width: parent.width
 			height: parent.childHeight
-			caption: "Load file"
+			caption: qsTr("Load file")
 			onClicked: {
 				fileopen.mode = 1
 				fileopen.open()
@@ -129,7 +129,7 @@ Item {
 		MenuButton {
 			width: parent.width
 			height: parent.childHeight
-			caption: "Load stolen"
+			caption: qsTr("Load stolen")
 			onClicked: {
 				fileopen.mode = 2
 				fileopen.open()
@@ -138,13 +138,13 @@ Item {
 		MenuButton {
 			width: parent.width
 			height: parent.childHeight
-			caption: "Dictionaries"
+			caption: qsTr("Dictionaries")
 			onClicked: {dictionaries.open()}
 		}
 		MenuButton {
 			width: parent.width
 			height: parent.childHeight
-			caption: "Settings"
+			caption: qsTr("Settings")
 			onClicked: {settings.open()}
 		}
 	}

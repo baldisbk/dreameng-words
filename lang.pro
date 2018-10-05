@@ -20,6 +20,8 @@ SOURCES += \
 
 RESOURCES += qml.qrc
 
+TRANSLATIONS = lang_ru_RU.ts lang_en_US.ts
+
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 
@@ -39,4 +41,6 @@ HEADERS += \
 
 DISTFILES += \
     sample.js \
-    words2.csv
+    words2.csv \
+    lang_en_US.ts \
+    lang_ru_RU.ts
