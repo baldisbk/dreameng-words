@@ -110,14 +110,14 @@ void AppState::next(Direction dir)
 	switch (page()->status()) {
 	case PageState::Header:
 		if (dir == Nowhere) break;
-		switch(static_cast<StatState*>(page())->otherState()) {
+		switch(static_cast<HeadState*>(page())->otherState()) {
 		case PageState::Learn:
 			newLearn();
 			if (m_selectedWords.size() == 0) {
-				static_cast<StatState*>(page())->setDescription(
+				static_cast<HeadState*>(page())->setDescription(
 					tr("No words to learn, get another dictionary"));
 			} else {
-				static_cast<StatState*>(page())->setDescription(
+				static_cast<HeadState*>(page())->setDescription(
 					QString(tr("You gonna learn %1 new words")).
 						arg(m_selectedWords.size()));
 			}
@@ -131,10 +131,10 @@ void AppState::next(Direction dir)
 		case PageState::Train:
 			newTrain();
 			if (m_selectedWords.size() == 0) {
-				static_cast<StatState*>(page())->setDescription(
+				static_cast<HeadState*>(page())->setDescription(
 					tr("No words to repeat, learn something first"));
 			} else {
-				static_cast<StatState*>(page())->setDescription(
+				static_cast<HeadState*>(page())->setDescription(
 					QString(tr("You gonna repeat %1 words")).
 						arg(m_selectedWords.size()));
 			}
@@ -142,10 +142,10 @@ void AppState::next(Direction dir)
 		case PageState::Repeat:
 			newRepeat();
 			if (m_selectedWords.size() == 0) {
-				static_cast<StatState*>(page())->setDescription(
+				static_cast<HeadState*>(page())->setDescription(
 					tr("No words to remind, train first"));
 			} else {
-				static_cast<StatState*>(page())->setDescription(
+				static_cast<HeadState*>(page())->setDescription(
 					QString(tr("You gonna remind %1 words")).
 						arg(m_selectedWords.size()));
 			}
@@ -159,11 +159,11 @@ void AppState::next(Direction dir)
 		int prev = prevTotalElapsed();
 		int curr = currTotalElapsed();
 		if (prev == 0) {
-			static_cast<StatState*>(page())->setDescription(
+			static_cast<HeadState*>(page())->setDescription(
 				QString(tr("Run took %1 seconds.\nTry to improve?")).
 					arg(double(curr)/1000));
 		} else {
-			static_cast<StatState*>(page())->setDescription(
+			static_cast<HeadState*>(page())->setDescription(
 				QString(tr("Run took %2 seconds (previous %1).\nTry to improve?")).
 					arg(double(prev)/1000).
 					arg(double(curr)/1000));
@@ -186,13 +186,13 @@ void AppState::next(Direction dir)
 			setLeft(new PageState(PageState::None));
 			setRight(new PageState(PageState::None));
 		} else {
-			setUpper(new StatState(
+			setUpper(new HeadState(
 				PageState::Header, PageState::Repeat,
 				QString(tr("You gonna remind %1 words")).arg(m_settings.seqLength())));
-			setLeft(new StatState(
+			setLeft(new HeadState(
 				PageState::Header, PageState::Train,
 				QString(tr("You gonna repeat %1 words")).arg(m_settings.seqLength())));
-			setRight(new StatState(
+			setRight(new HeadState(
 				PageState::Header, PageState::Learn,
 				QString(tr("You gonna learn %1 new words")).arg(m_settings.seqLength())));
 		}
@@ -204,7 +204,7 @@ void AppState::next(Direction dir)
 		setRight(new PageState(PageState::None));
 		break;
 	case PageState::Header: {
-		auto othState = static_cast<StatState*>(page())->otherState();
+		auto othState = static_cast<HeadState*>(page())->otherState();
 		setUpper(new PageState(PageState::Main));
 		setLower(new PageState(PageState::None));
 		if (isWordState(othState)) {
@@ -237,43 +237,43 @@ void AppState::next(Direction dir)
 		} else {
 			if (showWordOnState(status)) {
 				// there were translations? check 'em
-				setLeft(new StatState(
+				setLeft(new HeadState(
 					PageState::Header, PageState::Check,
 					QString(tr("Let's check these words"))));
-				setRight(new StatState(
+				setRight(new HeadState(
 					PageState::Header, PageState::Check,
 					QString(tr("Let's check these words"))));
 			} else if (m_errorWords.isEmpty()) {
 				// no errors - it's over
 				if (!showWordOnState(status))
 					// this last will be with error
-					setLeft(new StatState(
+					setLeft(new HeadState(
 						PageState::Header, PageState::Errors,
 						QString(tr("You should fix that error"))));
 				else
-					setLeft(new StatState(
+					setLeft(new HeadState(
 						PageState::Footer, PageState::Check,
 						QString(tr("Some statistics here"))));
-				setRight(new StatState(
+				setRight(new HeadState(
 					PageState::Footer, PageState::Check,
 					QString(tr("Some statistics here"))));
 			} else {
 				// had errors - fix 'em, bitch
-				setLeft(new StatState(
+				setLeft(new HeadState(
 					PageState::Header, PageState::Errors,
 					QString(tr("You should fix %1 errors")).arg(m_errorWords.size()+1)));
-				setRight(new StatState(
+				setRight(new HeadState(
 					PageState::Header, PageState::Errors,
 					QString(tr("You should fix %1 errors")).arg(m_errorWords.size())));
 			}
 		}
 		break;
 	case PageState::Footer: {
-		auto othState = static_cast<StatState*>(page())->otherState();
+		auto othState = static_cast<HeadState*>(page())->otherState();
 		setUpper(new PageState(PageState::None));
 		setLower(new PageState(PageState::None));
 		setLeft(new PageState(PageState::Main));
-		setRight(new StatState(
+		setRight(new HeadState(
 			PageState::Header, othState,
 			QString(tr("Let's try to improve"))));
 		break;
@@ -326,7 +326,7 @@ void AppState::loadState(QVariantMap state)
 		break;
 	case PageState::Header:
 	case PageState::Footer:
-		m_page = new StatState();
+		m_page = new HeadState();
 		break;
 	default:
 		m_page = new PageState();

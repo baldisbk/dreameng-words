@@ -84,12 +84,12 @@ private:
 	bool m_wordOnly;
 };
 
-class StatState : public PageState
+class HeadState : public PageState
 {
 	Q_OBJECT
 public:
-	explicit StatState(QObject *parent = nullptr) : PageState(parent) {}
-	StatState(State state, State addState, QString desc, QObject *parent = nullptr);
+	explicit HeadState(QObject *parent = nullptr) : PageState(parent) {}
+	HeadState(State state, State addState, QString desc, QObject *parent = nullptr);
 
 	Q_PROPERTY(State otherState READ otherState WRITE setOtherState NOTIFY otherStateChanged)
 	Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)

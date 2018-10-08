@@ -3,7 +3,7 @@ import QtQuick.Controls 2.1
 import AppState 1.0
 import PageState 1.0
 import WordState 1.0
-import StatState 1.0
+import HeadState 1.0
 import Settings 1.0
 
 ApplicationWindow {

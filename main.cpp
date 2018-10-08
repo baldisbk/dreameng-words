@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<AppState>("AppState", 1, 0, "AppState");
     qmlRegisterType<PageState>("PageState", 1, 0, "PageState");
     qmlRegisterType<WordState>("WordState", 1, 0, "WordState");
-    qmlRegisterType<StatState>("StatState", 1, 0, "StatState");
+    qmlRegisterType<HeadState>("HeadState", 1, 0, "HeadState");
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

@@ -96,16 +96,16 @@ void WordState::setWordOnly(bool wordOnly)
 	emit wordOnlyChanged(m_wordOnly);
 }
 
-StatState::StatState(PageState::State state, PageState::State addState, QString desc, QObject *parent) :
+HeadState::HeadState(PageState::State state, PageState::State addState, QString desc, QObject *parent) :
 	PageState(state, parent), m_otherState(addState), m_description(desc)
 {}
 
-PageState::State StatState::otherState() const
+PageState::State HeadState::otherState() const
 {
 	return m_otherState;
 }
 
-void StatState::setOtherState(PageState::State otherState)
+void HeadState::setOtherState(PageState::State otherState)
 {
 	if (m_otherState == otherState)
 		return;
@@ -114,7 +114,7 @@ void StatState::setOtherState(PageState::State otherState)
 	emit otherStateChanged(m_otherState);
 }
 
-void StatState::setDescription(QString description)
+void HeadState::setDescription(QString description)
 {
 	if (m_description == description)
 		return;
@@ -133,7 +133,7 @@ QString WordState::dump() const
 			arg(wordOnly());
 }
 
-QString StatState::dump() const
+QString HeadState::dump() const
 {
 	return QString("%1 => %2").
 		arg(PageState::dump()).
@@ -141,12 +141,12 @@ QString StatState::dump() const
 }
 
 
-QString StatState::store() const
+QString HeadState::store() const
 {
 	return PageState::store()+";"+stateToString(otherState())+";"+description();
 }
 
-void StatState::load(QString ctx)
+void HeadState::load(QString ctx)
 {
 	QStringList strs = ctx.split(";");
 	if (strs.size() < 2) return;
@@ -155,7 +155,7 @@ void StatState::load(QString ctx)
 	if (strs.size() >= 3) setDescription(strs[2]);
 }
 
-QString StatState::description() const
+QString HeadState::description() const
 {
 	return m_description;
 }
