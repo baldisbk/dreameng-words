@@ -199,9 +199,31 @@ void AppState::next(Direction dir)
 		break;
 	case PageState::Menu:
 		setUpper(new PageState(PageState::Main));
-		setLower(new PageState(PageState::None));
+		setLower(new StatState(PageState::Statistic, StatState::States));
 		setLeft(new PageState(PageState::None));
 		setRight(new PageState(PageState::None));
+		break;
+	case PageState::Statistic:
+		setUpper(new PageState(PageState::Main));
+		setLower(new PageState(PageState::None));
+		switch (static_cast<StatState*>(page())->type()) {
+		case StatState::Errors:
+			setLeft(new StatState(PageState::Statistic, StatState::Speed));
+			setRight(new StatState(PageState::Statistic, StatState::States));
+			break;
+		case StatState::States:
+			setLeft(new StatState(PageState::Statistic, StatState::Errors));
+			setRight(new StatState(PageState::Statistic, StatState::Speed));
+			break;
+		case StatState::Speed:
+			setLeft(new StatState(PageState::Statistic, StatState::States));
+			setRight(new StatState(PageState::Statistic, StatState::Errors));
+			break;
+		default:
+			setLeft(new PageState(PageState::None));
+			setRight(new PageState(PageState::None));
+			break;
+		}
 		break;
 	case PageState::Header: {
 		auto othState = static_cast<HeadState*>(page())->otherState();
@@ -327,6 +349,9 @@ void AppState::loadState(QVariantMap state)
 	case PageState::Header:
 	case PageState::Footer:
 		m_page = new HeadState();
+		break;
+	case PageState::Statistic:
+		m_page = new StatState();
 		break;
 	default:
 		m_page = new PageState();

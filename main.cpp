@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QTranslator>
 
@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("baldis.org");
     QCoreApplication::setApplicationName("DreamENG WordLearn");
 
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     QTranslator translator;
     QString fn = QString(":/lang_%1.qm").arg(QLocale::system().name());
@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<PageState>("PageState", 1, 0, "PageState");
     qmlRegisterType<WordState>("WordState", 1, 0, "WordState");
     qmlRegisterType<HeadState>("HeadState", 1, 0, "HeadState");
+    qmlRegisterType<StatState>("StatState", 1, 0, "StatState");
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

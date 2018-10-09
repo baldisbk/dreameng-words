@@ -13,6 +13,7 @@ QString PageState::stateToString(PageState::State state)
 	case Train: return "Train";
 	case Repeat: return "Repeat";
 	case Footer: return "Again";
+	case Statistic: return "Statistic";
 	default: return "Impossible";
 	}
 }
@@ -28,6 +29,7 @@ PageState::State PageState::stringToState(QString str)
 	if (str == "Train") return Train;
 	if (str == "Repeat") return Repeat;
 	if (str == "Again") return Footer;
+	if (str == "Statistic") return Statistic;
 	return None;
 }
 
@@ -176,4 +178,59 @@ void WordState::load(QString ctx)
 	setWord(strs[1]);
 	setTranslation(strs[2]);
 	setWordOnly(strs[3]=="0");
+}
+
+QString StatState::typeToString(StatState::Types type)
+{
+	switch (type) {
+	case Errors: return "Errors";
+	case States: return "States";
+	default: return QString();
+	}
+}
+
+StatState::Types StatState::stringToType(QString str)
+{
+	if (str == "Errors") return Errors;
+	if (str == "States") return States;
+	return None;
+}
+
+StatState::StatState(PageState::State state, StatState::Types type, QObject *parent) :
+	PageState(state, parent), m_type(type)
+{}
+
+QString StatState::dump() const
+{
+	return QString("%1 + %2").
+		arg(PageState::dump()).
+		arg(typeToString(type()));
+}
+
+QString StatState::store() const
+{
+	return PageState::store()+";"+
+		typeToString(type());
+}
+
+void StatState::load(QString ctx)
+{
+	QStringList strs = ctx.split(";");
+	if (strs.size() != 2) return;
+	PageState::load(strs[0]);
+	setType(stringToType(strs[1]));
+}
+
+StatState::Types StatState::type() const
+{
+	return m_type;
+}
+
+void StatState::setType(StatState::Types type)
+{
+	if (m_type == type)
+		return;
+
+	m_type = type;
+	emit typeChanged(m_type);
 }
