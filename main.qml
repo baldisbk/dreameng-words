@@ -151,6 +151,16 @@ ApplicationWindow {
 		return "#00000000"
 	}
 
+	Label {
+		text: appState.versionInfo
+		anchors {
+			bottom: parent.bottom
+			left: parent.left
+			right: parent.right
+		}
+		height: 20
+	}
+
 	FlipPage {
 		anchors.fill: parent
 		id: flip

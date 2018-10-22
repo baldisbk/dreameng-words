@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include "buildstats.gh"
+
 #include <QDebug>
 
 //#define DEBUG_DO_DUMP
@@ -656,6 +658,11 @@ PageState *AppState::page() const
 QString AppState::dictionary() const
 {
 	return m_dictionary;
+}
+
+QString AppState::versionInfo() const
+{
+	return QString("Ver. %1, build at %2").arg(BUILD_TAG).arg(BUILD_DATE);
 }
 
 void AppState::setUpper(PageState *upper)

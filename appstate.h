@@ -33,6 +33,7 @@ public:
 	Q_PROPERTY(QString dictionary READ dictionary WRITE setDictionary NOTIFY dictionaryChanged)
 
 	Q_PROPERTY(Settings* settings READ settings CONSTANT)
+	Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
 
 	// navigate
 	Q_INVOKABLE void next(Direction dir);
@@ -70,6 +71,8 @@ public:
 	PageState *page() const;
 
 	QString dictionary() const;
+
+	QString versionInfo() const;
 
 public slots:
 	void setUpper(PageState *upper);
