@@ -33,7 +33,7 @@ struct Word
 		res["translation"] = translation;
 		res["repeats"] = repeats;
 		res["errors"] = errors;
-		res["last"] = last.toSecsSinceEpoch();
+		res["last"] = QString::number(last.toSecsSinceEpoch());
 		res["age"] = age;
 		res["speed"] = speed;
 		res["lastspeed"] = lastspeed;
@@ -44,7 +44,7 @@ struct Word
 		return QString("%1;%2;%3;%4;%5;%6").
 			arg(repeats).
 			arg(errors).
-			arg(last.toSecsSinceEpoch()).
+			arg(QString::number(last.toSecsSinceEpoch())).
 			arg(age).
 			arg(speed).
 			arg(lastspeed);
@@ -54,7 +54,7 @@ struct Word
 		if (list.size() < 5) return;
 		repeats = list[0].toInt();
 		errors = list[1].toInt();
-		last.fromSecsSinceEpoch(list[2].toLongLong());
+		last.setSecsSinceEpoch(list[2].toLongLong());
 		age = list[3].toDouble();
 		speed = list[4].toInt();
 		lastspeed = list[5].toInt();
@@ -64,7 +64,7 @@ struct Word
 		translation = m.value("translation").toString();
 		repeats = m.value("repeats", 0).toInt();
 		errors = m.value("errors", 0).toInt();
-		last.fromSecsSinceEpoch(m.value("last", 0).toLongLong());
+		last.setSecsSinceEpoch(m.value("last", 0).toLongLong());
 		age = m.value("age", 0).toDouble();
 		speed = m.value("speed", 0).toInt();
 		lastspeed = m.value("lastspeed", 0).toInt();
