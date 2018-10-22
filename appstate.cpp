@@ -367,7 +367,6 @@ void AppState::addWord(Word word, int id)
 		dict = word.dict = m_dictionary;
 	if (id == -1)
 		while (m_ids.contains(++id)) {}
-	qDebug() << "Add word" << id << word.dump();
 	m_dicts[dict][id] = word;
 	if (dict == m_dictionary)
 		m_words[id] = word;
@@ -533,6 +532,25 @@ QString AppState::populateSteal(QString filename)
 		}
 	}
 	return dictionary();
+}
+
+void AppState::dumpToFile(QString filename)
+{
+	QFile file(filename);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+		qDebug() << "Error file" << file.errorString();
+		return;
+	}
+	QTextStream in(&file);
+	auto keys = Word::keys();
+	in << keys.join(";") << "\n\n";
+	for (Word w: m_dicts.value(m_dictionary)) {
+		auto values = w.store();
+		QStringList out;
+		for (auto k: keys)
+			out.append(values.value(k).toString());
+		in << out.join(";") << "\n";
+	}
 }
 
 QStringList AppState::wordFields() const

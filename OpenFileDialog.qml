@@ -6,6 +6,7 @@ FileDialog {
 	property int mode: 0
 	property Database database
 	folder: shortcuts.documents
+	selectExisting: mode != 3
 	onAccepted: {
 		var ind = fileUrl.toString().indexOf("://", 0)
 		var filePath
@@ -16,6 +17,7 @@ FileDialog {
 		switch (mode) {
 		case 1: db.fromfiles(filePath); break
 		case 2: db.fromstolen(filePath); break
+		case 3: db.state.dumpToFile(filePath); break
 		default: break;
 		}
 	}

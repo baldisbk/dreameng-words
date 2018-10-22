@@ -51,8 +51,14 @@ QtObject {
 			console.log(str)
 		}
 		console.log('-------- Words --------')
-		for (i = 0; i < w.rows.length; ++i)
-			console.log(w.rows.item(i))
+		for (i = 0; i < w.rows.length; ++i) {
+			var str1 = ""
+			for (var s1 in w.rows.item(i)) {
+				str1 += s1+"="+w.rows.item(i)[s1]+", "
+			}
+
+			console.log(str1)
+		}
 		console.log('======== End dump ========')
 	}
 

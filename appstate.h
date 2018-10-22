@@ -43,6 +43,7 @@ public:
 	Q_INVOKABLE QString populateDemo();
 	Q_INVOKABLE QString populateFile(QString filename);
 	Q_INVOKABLE QString populateSteal(QString filename);
+	Q_INVOKABLE void dumpToFile(QString filename);
 	// for DB create
 	Q_INVOKABLE QStringList wordFields() const;
 	Q_INVOKABLE QStringList stateFields() const;

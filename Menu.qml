@@ -53,5 +53,14 @@ Item {
 			caption: qsTr("Settings")
 			onClicked: {settings.open()}
 		}
+		MenuButton {
+			width: parent.width
+			height: parent.childHeight
+			caption: qsTr("Debug dump")
+			onClicked: {
+				fileopen.mode = 3
+				fileopen.open()
+			}
+		}
 	}
 }
