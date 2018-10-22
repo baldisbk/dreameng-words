@@ -84,7 +84,7 @@ signals:
 	void dictionaryChanged(QString dictionary);
 
 private:
-	void flipWord(bool ok);
+	void flipWord(bool modify, bool ok);
 	void showWord();
 	int prevTotalElapsed() const;
 	int currTotalElapsed() const;

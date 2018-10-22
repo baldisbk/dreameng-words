@@ -63,14 +63,14 @@ void AppState::next(Direction dir)
 	// actions & stats before
 	switch (page()->status()) {
 	case PageState::Learn:
-	case PageState::Check:
 	case PageState::Errors:
+	case PageState::Check:
 	case PageState::Train:
 	case PageState::Repeat:
 		switch (dir) {
 		case Right:
 		case Left:
-			flipWord(dir == Right);
+			flipWord(!showWordOnState(page()->status()), dir == Right);
 			break;
 		case Down:
 			m_prevElapsed = m_lastElapsed;
@@ -695,8 +695,12 @@ void AppState::setDictionary(QString dictionary)
 	emit dictionaryChanged(m_dictionary);
 }
 
-void AppState::flipWord(bool ok)
+void AppState::flipWord(bool modify, bool ok)
 {
+	if (!modify) {
+		++m_currentWord;
+		return;
+	}
 	int index = m_selectedWords[m_currentWord];
 	Word w = m_changedWords[index];
 	if (w.age > TrainThreshold) {
