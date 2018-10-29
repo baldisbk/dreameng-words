@@ -47,7 +47,7 @@ Try to improve?</source>
         <location filename="appstate.cpp" line="167"/>
         <source>Run took %2 seconds (previous %1).
 Try to improve?</source>
-        <translation>Повтор занял %1 секунд (предыдущий %2 секунд).
+        <translation>Повтор занял %2 секунд (предыдущий %1 секунд).
 Попробуете улучшить результат?</translation>
     </message>
     <message>
