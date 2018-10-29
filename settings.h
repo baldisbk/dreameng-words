@@ -10,24 +10,19 @@ public:
 	explicit Settings(QObject *parent = nullptr);
 
 	Q_PROPERTY(int seqLength READ seqLength WRITE setSeqLength NOTIFY seqLengthChanged)
-	Q_PROPERTY(int seqNumber READ seqNumber WRITE setSeqNumber NOTIFY seqNumberChanged)
 
 	int seqLength() const;
-	int seqNumber() const;
 	QString store() const;
 
 signals:
 	void seqLengthChanged(int seqLength);
-	void seqNumberChanged(int seqNumber);
 
 public slots:
 	void setSeqLength(int seqLength);
-	void setSeqNumber(int seqNumber);
 	void load(QString str);
 
 private:
 	int m_seqLength;
-	int m_seqNumber;
 };
 
 #endif // SETTINGS_H

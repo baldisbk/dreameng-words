@@ -19,6 +19,7 @@ const double BadSpeedRatio = 2.0;	// if new speed if this times more, it's consi
 const double BadSpeedCost = 1.0;	// age reducing coeff for bad speed
 const int TrainElapsedRound = 3600;	// time from last repeat rounded
 const int TrainElapsedCoeff = 7;	// time from last repeat coeff
+const int DefaultSeriesSize = 20;
 
 QString listToString(QVector<int> list)
 {
@@ -289,8 +290,7 @@ void AppState::next(Direction dir)
 
 void AppState::init()
 {
-	m_settings.setSeqLength(3);
-	m_settings.setSeqNumber(1);
+	m_settings.setSeqLength(DefaultSeriesSize);
 
 	m_page = new PageState(PageState::Main);
 	finish();
@@ -312,8 +312,7 @@ void AppState::addWord(QVariantMap word)
 
 void AppState::loadState(QVariantMap state)
 {
-	m_settings.setSeqLength(3);
-	m_settings.setSeqNumber(1);
+	m_settings.setSeqLength(DefaultSeriesSize);
 
 	if (m_page!=nullptr) delete m_page;
 	switch (PageState::stringToState(state["state"].toString())) {
