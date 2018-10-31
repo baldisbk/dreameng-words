@@ -49,7 +49,7 @@ ApplicationWindow {
 			obj = menuFact.createObject(flip, {"anchors.fill": flip, "visible": false, "db": db})
 			break
 		case PageState.Statistic:
-			obj = statFact.createObject(flip, {"anchors.fill": flip, "visible": false})
+			obj = statFact.createObject(flip, {"anchors.fill": flip, "visible": false, "bars": state.series})
 			break
 		case PageState.None:
 			// fallthrough
@@ -113,6 +113,7 @@ ApplicationWindow {
 			}
 			break
 		case PageState.Statistic:
+			console.log(state.type)
 			switch (state.type) {
 			case StatState.Errors:
 				page.headCap = qsTr("Errors")

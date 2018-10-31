@@ -5,6 +5,7 @@
 #include "settings.h"
 #include "appstate.h"
 #include "pagestate.h"
+#include "barseries.h"
 
 #include <QDebug>
 
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<WordState>("WordState", 1, 0, "WordState");
     qmlRegisterType<HeadState>("HeadState", 1, 0, "HeadState");
     qmlRegisterType<StatState>("StatState", 1, 0, "StatState");
+    qmlRegisterType<BarSeries>("BarSeries", 1, 0, "BarSeries");
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

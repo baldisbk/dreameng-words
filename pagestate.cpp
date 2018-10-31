@@ -183,22 +183,36 @@ void WordState::load(QString ctx)
 QString StatState::typeToString(StatState::Types type)
 {
 	switch (type) {
+	case None: return QString();
 	case Errors: return "Errors";
 	case States: return "States";
-	default: return QString();
+	case Speed: return "Speed";
 	}
+	return QString();
 }
 
 StatState::Types StatState::stringToType(QString str)
 {
 	if (str == "Errors") return Errors;
 	if (str == "States") return States;
+	if (str == "Speed") return Speed;
 	return None;
 }
 
 StatState::StatState(PageState::State state, StatState::Types type, QObject *parent) :
 	PageState(state, parent), m_type(type)
-{}
+{
+	m_series.clear();
+	BarSeries::Serie first, second, third;
+	first << BarSeries::Value(0, 100);
+	second << BarSeries::Value(0, 50);
+	third << BarSeries::Value(0, 150);
+	m_series.addSerie(first);
+	m_series.addSerie(second);
+	m_series.addSerie(third);
+	m_series.setChecks(QVector<double>() << 0);
+	m_series.adjust();
+}
 
 QString StatState::dump() const
 {
@@ -224,6 +238,11 @@ void StatState::load(QString ctx)
 StatState::Types StatState::type() const
 {
 	return m_type;
+}
+
+BarSeries *StatState::series()
+{
+	return &m_series;
 }
 
 void StatState::setType(StatState::Types type)

@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "word.h"
+#include "barseries.h"
 
 class PageState : public QObject
 {
@@ -33,6 +34,7 @@ public:
 
 	explicit PageState(QObject *parent = nullptr) : QObject(parent) {}
 	PageState(State state, QObject *parent = nullptr);
+	virtual ~PageState() override {}
 
 	Q_PROPERTY(State status READ status WRITE setStatus NOTIFY statusChanged)
 	State status() const;
@@ -136,12 +138,15 @@ public:
 	StatState(State state, Types type, QObject *parent = nullptr);
 
 	Q_PROPERTY(Types type READ type WRITE setType NOTIFY typeChanged)
+	Q_PROPERTY(BarSeries* series READ series)
 
 	virtual QString dump() const override;
 	virtual QString store() const override;
 	virtual void load(QString ctx) override;
 
 	Types type() const;
+
+	BarSeries *series();
 
 public slots:
 	void setType(Types type);
@@ -151,6 +156,7 @@ signals:
 
 private:
 	Types m_type;
+	BarSeries m_series;
 };
 
 #endif // PAGESTATE_H

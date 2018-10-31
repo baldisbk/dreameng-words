@@ -15,6 +15,7 @@
         <file>DictsDialog.qml</file>
         <file>OpenFileDialog.qml</file>
         <file>StatPage.qml</file>
+        <file>BarChart.qml</file>
     </qresource>
     <qresource prefix="/tr"/>
     <qresource prefix="/tc"/>
