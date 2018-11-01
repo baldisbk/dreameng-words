@@ -14,12 +14,25 @@ Canvas {
 		ctx.lineTo(frameWidth, height - frameWidth)
 		ctx.lineTo(width - frameWidth, height - frameWidth)
 		ctx.stroke()
+		ctx.closePath()
 
+		switch (bars.graphType) {
+		case BarSeries.Bars:
+			drawBars(ctx)
+			break
+		case BarSeries.Graph:
+			drawGraph(ctx)
+			break
+		}
+
+		ctx.restore()
+	}
+	function drawBars(ctx) {
 		var serieNum = bars.seriesNum
 		var checkNum = bars.checksNum
 		var bottomLine = height - frameWidth
 		var visH = height - frameWidth*2
-		var totalH = bars.maximum// - bars.minimum : for graphs
+		var totalH = bars.maximum
 		if (totalH == 0) totalH = visH
 		var hCoeff = visH/totalH
 		if (serieNum*checkNum == 0) return
@@ -34,6 +47,44 @@ Canvas {
 				pos += barWidth
 			}
 			pos += barWidth*gapPercent
+		}
+	}
+	function drawGraph(ctx) {
+		var serieNum = bars.seriesNum
+		var bottomLine = height - frameWidth
+
+		var visH = height - frameWidth*2
+		var totalH = bars.maximum - bars.minimum
+		if (totalH == 0) totalH = visH
+		var hCoeff = visH/totalH
+
+		var visW = width - frameWidth*2
+		var totalW = bars.finish - bars.start
+		if (totalW == 0) totalW = visW
+		var vCoeff = visW/totalW
+
+		if (serieNum == 0) return
+
+		for (var j=0; j<serieNum; ++j) {
+			var first = true
+			ctx.beginPath()
+			if (j==0)
+				ctx.strokeStyle = "green"
+			else
+				ctx.strokeStyle = "red"
+			for (var i=0; i<bars.serieSize(j); ++i) {
+				if (first)
+					ctx.moveTo(
+						frameWidth + (bars.x(j,i)-bars.start)*vCoeff,
+						bottomLine - (bars.y(j,i)-bars.minimum)*hCoeff)
+				else
+					ctx.lineTo(
+						frameWidth + (bars.x(j,i)-bars.start)*vCoeff,
+						bottomLine - (bars.y(j,i)-bars.minimum)*hCoeff)
+				first = false
+			}
+			ctx.stroke()
+			ctx.closePath()
 		}
 	}
 }

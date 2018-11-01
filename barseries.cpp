@@ -4,6 +4,7 @@
 
 BarSeries::BarSeries(QObject *parent) : QObject(parent)
 {
+	setGraphType(Bars);
 }
 
 int BarSeries::seriesNum() const
@@ -129,6 +130,11 @@ void BarSeries::adjust()
 	setFinish(finish);
 }
 
+BarSeries::GraphType BarSeries::graphType() const
+{
+	return m_graphType;
+}
+
 double BarSeries::start() const
 {
 	return m_start;
@@ -173,6 +179,15 @@ void BarSeries::setFinish(double finish)
 
 	m_finish = finish;
 	emit finishChanged(m_finish);
+}
+
+void BarSeries::setGraphType(BarSeries::GraphType graphType)
+{
+	if (m_graphType == graphType)
+		return;
+
+	m_graphType = graphType;
+	emit graphTypeChanged(m_graphType);
 }
 
 int Serie::size() const

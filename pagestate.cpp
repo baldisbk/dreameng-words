@@ -204,14 +204,28 @@ StatState::StatState(PageState::State state, StatState::Types type, QObject *par
 {
 	m_series.clear();
 	BarSeries::Serie first, second, third;
-	first << BarSeries::Value(0, 100);
-	second << BarSeries::Value(0, 50);
-	third << BarSeries::Value(0, 150);
+	first << BarSeries::Value(0, 100)<< BarSeries::Value(1, 150)<< BarSeries::Value(2, 50);
+	second << BarSeries::Value(0, 50)<< BarSeries::Value(1, 100)<< BarSeries::Value(2, 150);
+	third << BarSeries::Value(0, 150)<< BarSeries::Value(1, 50)<< BarSeries::Value(2, 100);
 	m_series.addSerie(first);
 	m_series.addSerie(second);
 	m_series.addSerie(third);
-	m_series.setChecks(QVector<double>() << 0);
+	m_series.setChecks(QVector<double>() << 0 << 1 << 2);
 	m_series.adjust();
+	m_series.setMinimum(0);
+	switch(m_type) {
+	case States:
+		m_series.setGraphType(BarSeries::Bars);
+		break;
+	case Errors:
+		m_series.setGraphType(BarSeries::Graph);
+		break;
+	case Speed:
+		m_series.setGraphType(BarSeries::Graph);
+		break;
+	case None:
+		break;
+	}
 }
 
 QString StatState::dump() const
