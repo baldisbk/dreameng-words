@@ -1,5 +1,7 @@
 #include "barseries.h"
 
+#include <QDebug>
+
 BarSeries::BarSeries(QObject *parent) : QObject(parent)
 {
 }
@@ -113,13 +115,18 @@ void BarSeries::adjust()
 		for(auto val: serie) {
 			if (first || val.first < start) start = val.first;
 			if (first || val.first > finish) finish = val.first;
-			if (first || val.first < min) min = val.second;
-			if (first || val.first > max) max = val.second;
+			if (first || val.second < min) min = val.second;
+			if (first || val.second > max) max = val.second;
+			first = false;
 		}
 	if (!m_checks.isEmpty()) {
 		start = m_checks.front();
 		finish = m_checks.last();
 	}
+	setMaximum(max);
+	setMinimum(min);
+	setStart(start);
+	setFinish(finish);
 }
 
 double BarSeries::start() const
