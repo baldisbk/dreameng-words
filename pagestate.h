@@ -34,7 +34,6 @@ public:
 
 	explicit PageState(QObject *parent = nullptr) : QObject(parent) {}
 	PageState(State state, QObject *parent = nullptr);
-	virtual ~PageState() override {}
 
 	Q_PROPERTY(State status READ status WRITE setStatus NOTIFY statusChanged)
 	State status() const;
