@@ -113,7 +113,6 @@ ApplicationWindow {
 			}
 			break
 		case PageState.Statistic:
-			console.log(state.type)
 			switch (state.type) {
 			case StatState.Errors:
 				page.headCap = qsTr("Errors")

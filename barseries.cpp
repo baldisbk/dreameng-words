@@ -141,7 +141,6 @@ double BarSeries::finish() const
 
 void BarSeries::setMinimum(double minimum)
 {
-	qWarning("Floating point comparison needs context sanity check");
 	if (qFuzzyCompare(m_minimum, minimum))
 		return;
 
@@ -151,7 +150,6 @@ void BarSeries::setMinimum(double minimum)
 
 void BarSeries::setMaximum(double maximum)
 {
-	qWarning("Floating point comparison needs context sanity check");
 	if (qFuzzyCompare(m_maximum, maximum))
 		return;
 
@@ -161,7 +159,6 @@ void BarSeries::setMaximum(double maximum)
 
 void BarSeries::setStart(double start)
 {
-	qWarning("Floating point comparison needs context sanity check");
 	if (qFuzzyCompare(m_start, start))
 		return;
 
@@ -171,7 +168,6 @@ void BarSeries::setStart(double start)
 
 void BarSeries::setFinish(double finish)
 {
-	qWarning("Floating point comparison needs context sanity check");
 	if (qFuzzyCompare(m_finish, finish))
 		return;
 
