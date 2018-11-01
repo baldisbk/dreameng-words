@@ -6,6 +6,8 @@
 #include "word.h"
 #include "barseries.h"
 
+class AppState;
+
 class PageState : public QObject
 {
 	Q_OBJECT
@@ -134,7 +136,7 @@ public:
 	static Types stringToType(QString str);
 
 	explicit StatState(QObject *parent = nullptr) : PageState(parent) {}
-	StatState(State state, Types type, QObject *parent = nullptr);
+	StatState(Types type, AppState *app, QObject *parent = nullptr);
 
 	Q_PROPERTY(Types type READ type WRITE setType NOTIFY typeChanged)
 	Q_PROPERTY(BarSeries* series READ series)
