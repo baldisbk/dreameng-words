@@ -171,3 +171,27 @@ void BarSeries::setFinish(double finish)
 	m_finish = finish;
 	emit finishChanged(m_finish);
 }
+
+int Serie::size() const
+{
+	return m_serie.size();
+}
+
+double Serie::x(int num) const
+{
+	if (num < 0 || num >= m_serie.size())
+		return 0;
+	return m_serie.at(num).first;
+}
+
+double Serie::y(int num) const
+{
+	if (num < 0 || num >= m_serie.size())
+		return 0;
+	return m_serie.at(num).second;
+}
+
+QColor Serie::color() const
+{
+	return m_color;
+}

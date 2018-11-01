@@ -3,6 +3,29 @@
 
 #include <QObject>
 #include <QVector>
+#include <QColor>
+
+class Serie : public QObject
+{
+	Q_OBJECT
+public:
+	explicit Serie(QObject *parent = nullptr) : QObject(parent) {}
+	virtual ~Serie() {}
+
+	Q_PROPERTY(QColor color READ color)
+
+	Q_INVOKABLE int size() const;
+	Q_INVOKABLE double x(int num) const;
+	Q_INVOKABLE double y(int num) const;
+
+	typedef QPair<double, double> Value;
+
+	QColor color() const;
+
+private:
+	QVector<Value> m_serie;
+	QColor m_color;
+};
 
 class BarSeries : public QObject
 {
