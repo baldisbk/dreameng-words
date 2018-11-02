@@ -203,28 +203,18 @@ void AppState::next(Direction dir)
 		setLeft(new PageState(PageState::None));
 		setRight(new PageState(PageState::None));
 		break;
-	case PageState::Statistic:
+	case PageState::Statistic: {
 		setUpper(new PageState(PageState::Main));
 		setLower(new PageState(PageState::None));
-		switch (static_cast<StatState*>(page())->type()) {
-		case StatState::Errors:
-			setLeft(new StatState(StatState::Speed, this));
-			setRight(new StatState(StatState::States, this));
-			break;
-		case StatState::States:
-			setLeft(new StatState(StatState::Errors, this));
-			setRight(new StatState(StatState::Speed, this));
-			break;
-		case StatState::Speed:
-			setLeft(new StatState(StatState::States, this));
-			setRight(new StatState(StatState::Errors, this));
-			break;
-		default:
-			setLeft(new PageState(PageState::None));
-			setRight(new PageState(PageState::None));
-			break;
-		}
+		auto type = static_cast<StatState*>(page())->type();
+		auto nextt = StatState::Types(type+1);
+		auto prevt = StatState::Types(type-1);
+		if (nextt == StatState::NoOfTypes) nextt = StatState::Types(StatState::None+1);
+		if (prevt == StatState::None) prevt = StatState::Types(StatState::NoOfTypes-1);
+		setLeft(new StatState(prevt, this));
+		setRight(new StatState(nextt, this));
 		break;
+	}
 	case PageState::Header: {
 		auto othState = static_cast<HeadState*>(page())->otherState();
 		setUpper(new PageState(PageState::Main));
@@ -698,11 +688,19 @@ bool repeatPredicate(Word word) {
 QVector<int> AppState::states() const
 {
 	QVector<int> res(3, 0);
-	for (int i = 0; i < m_words.size(); ++i) {
-		if (learnPredicate(m_words[i])) res[0] = res[0]+1;
-		if (trainPredicate(m_words[i])) res[1] = res[1]+1;
-		if (repeatPredicate(m_words[i])) res[2] = res[2]+1;
+	for (auto w: m_words) {
+		if (learnPredicate(w)) res[0] = res[0]+1;
+		if (trainPredicate(w)) res[1] = res[1]+1;
+		if (repeatPredicate(w)) res[2] = res[2]+1;
 	}
+	return res;
+}
+
+QVector<double> AppState::stats(QString stat) const
+{
+	QVector<double> res;
+	for (auto w: m_words)
+		res << w.store().value(stat).toDouble();
 	return res;
 }
 

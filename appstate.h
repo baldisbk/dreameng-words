@@ -72,6 +72,7 @@ public:
 	QString dictionary() const;
 
 	QVector<int> states() const;
+	QVector<double> stats(QString stat) const;
 
 public slots:
 	void setUpper(PageState *upper);

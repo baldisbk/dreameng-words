@@ -128,7 +128,10 @@ public:
 		None = 0,
 		Errors,
 		States,
-		Speed
+		Speed,
+		Age,
+
+		NoOfTypes
 	};
 	Q_ENUM(Types)
 
@@ -154,6 +157,9 @@ public slots:
 
 signals:
 	void typeChanged(Types type);
+
+private:
+	void fillGraph(AppState *app, QString stat);
 
 private:
 	Types m_type;

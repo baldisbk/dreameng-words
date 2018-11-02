@@ -1,6 +1,8 @@
 #include "pagestate.h"
 #include "appstate.h"
 
+//const int GRAPH_CLUSTER_NUMBER = 20;
+
 QString PageState::stateToString(PageState::State state)
 {
 	switch (state) {
@@ -183,10 +185,13 @@ void WordState::load(QString ctx)
 QString StatState::typeToString(StatState::Types type)
 {
 	switch (type) {
-	case None: return QString();
+	case None:
+	case NoOfTypes:
+		return QString();
 	case Errors: return "Errors";
 	case States: return "States";
 	case Speed: return "Speed";
+	case Age: return "Age";
 	}
 	return QString();
 }
@@ -196,6 +201,7 @@ StatState::Types StatState::stringToType(QString str)
 	if (str == "Errors") return Errors;
 	if (str == "States") return States;
 	if (str == "Speed") return Speed;
+	if (str == "Age") return Age;
 	return None;
 }
 
@@ -216,23 +222,50 @@ StatState::StatState(StatState::Types type, AppState *app, QObject *parent) :
 		break;
 	}
 	case Errors:
+		fillGraph(app, "errors");
+		break;
 	case Speed: {
-		m_series.clear();
-		BarSeries::Serie first, second, third;
-		first << BarSeries::Value(0, 100)<< BarSeries::Value(1, 150)<< BarSeries::Value(2, 50);
-		second << BarSeries::Value(0, 50)<< BarSeries::Value(1, 100)<< BarSeries::Value(2, 150);
-		third << BarSeries::Value(0, 150)<< BarSeries::Value(1, 50)<< BarSeries::Value(2, 100);
-		m_series.addSerie(first);
-		m_series.addSerie(second);
-		m_series.addSerie(third);
-		m_series.adjust();
-		m_series.setMinimum(0);
-		m_series.setGraphType(BarSeries::Graph);
+		fillGraph(app, "speed");
+		break;
+	}
+	case Age: {
+		fillGraph(app, "age");
 		break;
 	}
 	case None:
+	case NoOfTypes:
 		break;
 	}
+}
+
+void StatState::fillGraph(AppState *app, QString stat)
+{
+	m_series.clear();
+	BarSeries::Serie graph;
+
+	auto res = app->stats(stat);
+	std::sort(res.begin(), res.end());
+
+	int index = 0;
+	for (auto v: res)
+		graph << BarSeries::Value(index++, v);
+
+//	double cWidth = (res.back() - res.front()) / GRAPH_CLUSTER_NUMBER;
+
+//	int count = 0;
+//	double start = res.front();
+//	for (auto v: res) {
+//		if (v <= start + cWidth) {
+//			++count;
+//		} else {
+//			graph << BarSeries::Value(start, count);
+//			count = 0;
+//			start += cWidth;
+//		}
+//	}
+	m_series.addSerie(graph);
+	m_series.adjust();
+	m_series.setGraphType(BarSeries::Graph);
 }
 
 QString StatState::dump() const

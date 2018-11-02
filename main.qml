@@ -123,6 +123,9 @@ ApplicationWindow {
 			case StatState.Speed:
 				page.headCap = qsTr("Speed")
 				break
+			case StatState.Age:
+				page.headCap = qsTr("Age")
+				break
 			default:
 				page.headCap = qsTr("UNEXPECTED! ")+state.type
 				break
