@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<HeadState>("HeadState", 1, 0, "HeadState");
     qmlRegisterType<StatState>("StatState", 1, 0, "StatState");
     qmlRegisterType<BarSeries>("BarSeries", 1, 0, "BarSeries");
+    qmlRegisterType<BarSerie>("BarSerie", 1, 0, "BarSerie");
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

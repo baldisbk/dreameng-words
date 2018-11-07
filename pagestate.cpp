@@ -212,9 +212,15 @@ StatState::StatState(StatState::Types type, AppState *app, QObject *parent) :
 	case States: {
 		auto states = app->states();
 		m_series.clear();
-		m_series.addSerie(BarSeries::Serie() << BarSeries::Value(0, states[0]));
-		m_series.addSerie(BarSeries::Serie() << BarSeries::Value(0, states[1]));
-		m_series.addSerie(BarSeries::Serie() << BarSeries::Value(0, states[2]));
+		auto n = new BarSerie(BarSerie::Serie() << BarSerie::Value(0, states[0]), this);
+		n->setColor(Qt::red);
+		auto t = new BarSerie(BarSerie::Serie() << BarSerie::Value(0, states[1]), this);
+		t->setColor(Qt::green);
+		auto r = new BarSerie(BarSerie::Serie() << BarSerie::Value(0, states[2]), this);
+		r->setColor(Qt::blue);
+		m_series.addSerie(n);
+		m_series.addSerie(t);
+		m_series.addSerie(r);
 		m_series.setChecks(QVector<double>() << 0);
 		m_series.adjust();
 		m_series.setMinimum(0);
@@ -241,14 +247,14 @@ StatState::StatState(StatState::Types type, AppState *app, QObject *parent) :
 void StatState::fillGraph(AppState *app, QString stat)
 {
 	m_series.clear();
-	BarSeries::Serie graph;
+	BarSerie::Serie graph;
 
 	auto res = app->stats(stat);
 	std::sort(res.begin(), res.end());
 
 	int index = 0;
 	for (auto v: res)
-		graph << BarSeries::Value(index++, v);
+		graph << BarSerie::Value(index++, v);
 
 //	double cWidth = (res.back() - res.front()) / GRAPH_CLUSTER_NUMBER;
 
@@ -263,7 +269,9 @@ void StatState::fillGraph(AppState *app, QString stat)
 //			start += cWidth;
 //		}
 //	}
-	m_series.addSerie(graph);
+	auto serie = new BarSerie(graph, this);
+	serie->setColor(Qt::red);
+	m_series.addSerie(serie);
 	m_series.adjust();
 	m_series.setGraphType(BarSeries::Graph);
 }

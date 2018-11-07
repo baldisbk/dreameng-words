@@ -5,26 +5,40 @@
 #include <QVector>
 #include <QColor>
 
-class Serie : public QObject
+class BarSerie : public QObject
 {
 	Q_OBJECT
 public:
-	explicit Serie(QObject *parent = nullptr) : QObject(parent) {}
-	virtual ~Serie() {}
+	typedef QPair<double, double> Value;
+	typedef QVector<Value> Serie;
 
-	Q_PROPERTY(QColor color READ color)
+	explicit BarSerie(QObject *parent = nullptr) : QObject(parent), m_color(Qt::black) {}
+	explicit BarSerie(Serie values, QObject *parent = nullptr) :
+		QObject(parent), m_serie(values), m_color(Qt::black) {}
+	virtual ~BarSerie() {}
 
-	Q_INVOKABLE int size() const;
+	Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
+	Q_PROPERTY(int size READ size NOTIFY sizeChanged)
+
 	Q_INVOKABLE double x(int num) const;
 	Q_INVOKABLE double y(int num) const;
 
-	typedef QPair<double, double> Value;
-
+	int size() const;
 	QColor color() const;
 
+	void setValues(Serie values);
+
+public slots:
+	void setColor(QColor color);
+
+signals:
+	void colorChanged(QColor color);
+	void sizeChanged(int size);
+
 private:
-	QVector<Value> m_serie;
+	Serie m_serie;
 	QColor m_color;
+	int m_size;
 };
 
 class BarSeries : public QObject
@@ -58,15 +72,10 @@ public:
 
 	Q_INVOKABLE double checkAt(int num) const;
 	Q_INVOKABLE double yCheckAt(int serie, int num) const;
-	Q_INVOKABLE int serieSize(int serie) const;
-	Q_INVOKABLE double x(int serie, int num) const;
-	Q_INVOKABLE double y(int serie, int num) const;
-
-	typedef QPair<double, double> Value;
-	typedef QVector<Value> Serie;
+	Q_INVOKABLE BarSerie* serie(int s);
 
 	void clear();
-	int addSerie(Serie serie);
+	int addSerie(BarSerie *serie);
 	void delSerie(int num);
 	void setChecks(QVector<double> checks);
 	void adjust();
@@ -94,7 +103,7 @@ private:
 	double m_finish;
 
 	QVector<double> m_checks;
-	QList<Serie> m_series;
+	QList<BarSerie*> m_series;
 	GraphType m_graphType;
 };
 

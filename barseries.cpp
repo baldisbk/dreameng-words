@@ -43,39 +43,19 @@ double BarSeries::yCheckAt(int serie, int num) const
 	double pos = m_checks.at(num);
 	int index = 0;
 	auto s = m_series.at(serie);
-	while (s.at(index).first < pos) {
+	while (s->x(index) < pos) {
 		++index;
-		if (index >= s.size())
+		if (index >= s->size())
 			return 0;
 	}
-	return s.at(index).second;
+	return s->y(index);
 }
 
-int BarSeries::serieSize(int serie) const
+BarSerie *BarSeries::serie(int s)
 {
-	if (serie < 0 || serie >= m_series.size())
-		return 0;
-	return m_series.at(serie).size();
-}
-
-double BarSeries::x(int serie, int num) const
-{
-	if (serie < 0 || serie >= m_series.size())
-		return 0;
-	auto s = m_series.at(serie);
-	if (num < 0 || num >= s.size())
-		return 0;
-	return s.at(num).first;
-}
-
-double BarSeries::y(int serie, int num) const
-{
-	if (serie < 0 || serie >= m_series.size())
-		return 0;
-	auto s = m_series.at(serie);
-	if (num < 0 || num >= s.size())
-		return 0;
-	return s.at(num).second;
+	if (s < 0 || s >= m_series.size())
+		return nullptr;
+	return m_series.value(s);
 }
 
 void BarSeries::clear()
@@ -86,7 +66,7 @@ void BarSeries::clear()
 	emit seriesNumChanged(0);
 }
 
-int BarSeries::addSerie(BarSeries::Serie serie)
+int BarSeries::addSerie(BarSerie *serie)
 {
 	m_series.append(serie);
 	emit seriesNumChanged(m_series.size()-1);
@@ -113,11 +93,11 @@ void BarSeries::adjust()
 	double max = 0;
 	bool first = true;
 	for(auto serie: m_series)
-		for(auto val: serie) {
-			if (first || val.first < start) start = val.first;
-			if (first || val.first > finish) finish = val.first;
-			if (first || val.second < min) min = val.second;
-			if (first || val.second > max) max = val.second;
+		for(int i = 0; i < serie->size(); ++i) {
+			if (first || serie->x(i) < start) start = serie->x(i);
+			if (first || serie->x(i) > finish) finish = serie->x(i);
+			if (first || serie->y(i) < min) min = serie->y(i);
+			if (first || serie->y(i) > max) max = serie->y(i);
 			first = false;
 		}
 	if (!m_checks.isEmpty()) {
@@ -190,26 +170,41 @@ void BarSeries::setGraphType(BarSeries::GraphType graphType)
 	emit graphTypeChanged(m_graphType);
 }
 
-int Serie::size() const
+int BarSerie::size() const
 {
 	return m_serie.size();
 }
 
-double Serie::x(int num) const
+double BarSerie::x(int num) const
 {
 	if (num < 0 || num >= m_serie.size())
 		return 0;
 	return m_serie.at(num).first;
 }
 
-double Serie::y(int num) const
+double BarSerie::y(int num) const
 {
 	if (num < 0 || num >= m_serie.size())
 		return 0;
 	return m_serie.at(num).second;
 }
 
-QColor Serie::color() const
+QColor BarSerie::color() const
 {
 	return m_color;
+}
+
+void BarSerie::setValues(BarSerie::Serie values)
+{
+	m_serie = values;
+	emit sizeChanged(size());
+}
+
+void BarSerie::setColor(QColor color)
+{
+	if (m_color == color)
+		return;
+
+	m_color = color;
+	emit colorChanged(m_color);
 }

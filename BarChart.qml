@@ -52,7 +52,7 @@ Canvas {
 
 		for (var i=0; i<checkNum; ++i) {
 			for (var j=0; j<serieNum; ++j) {
-				ctx.fillStyle = "green"
+				ctx.fillStyle = bars.serie(j).color
 				var h = bars.yCheckAt(j, i)*hCoeff
 				ctx.fillRect(pos, bottomLine - h, barWidth, h)
 				pos += barWidth
@@ -79,19 +79,17 @@ Canvas {
 		for (var j=0; j<serieNum; ++j) {
 			var first = true
 			ctx.beginPath()
-			if (j==0)
-				ctx.strokeStyle = "green"
-			else
-				ctx.strokeStyle = "red"
-			for (var i=0; i<bars.serieSize(j); ++i) {
+			var serie = bars.serie(j)
+			ctx.strokeStyle = serie.color
+			for (var i=0; i<serie.size; ++i) {
 				if (first)
 					ctx.moveTo(
-						frameWidth + (bars.x(j,i)-bars.start)*vCoeff,
-						bottomLine - (bars.y(j,i)-bars.minimum)*hCoeff)
+						frameWidth + (serie.x(i)-bars.start)*vCoeff,
+						bottomLine - (serie.y(i)-bars.minimum)*hCoeff)
 				else
 					ctx.lineTo(
-						frameWidth + (bars.x(j,i)-bars.start)*vCoeff,
-						bottomLine - (bars.y(j,i)-bars.minimum)*hCoeff)
+						frameWidth + (serie.x(i)-bars.start)*vCoeff,
+						bottomLine - (serie.y(i)-bars.minimum)*hCoeff)
 				first = false
 			}
 			ctx.stroke()
