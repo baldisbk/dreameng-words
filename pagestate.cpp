@@ -1,6 +1,8 @@
 #include "pagestate.h"
 #include "appstate.h"
 
+//const int GRAPH_CLUSTER_NUMBER = 20;
+
 QString PageState::stateToString(PageState::State state)
 {
 	switch (state) {
@@ -13,6 +15,7 @@ QString PageState::stateToString(PageState::State state)
 	case Train: return "Train";
 	case Repeat: return "Repeat";
 	case Footer: return "Again";
+	case Statistic: return "Statistic";
 	default: return "Impossible";
 	}
 }
@@ -28,6 +31,7 @@ PageState::State PageState::stringToState(QString str)
 	if (str == "Train") return Train;
 	if (str == "Repeat") return Repeat;
 	if (str == "Again") return Footer;
+	if (str == "Statistic") return Statistic;
 	return None;
 }
 
@@ -176,4 +180,138 @@ void WordState::load(QString ctx)
 	setWord(strs[1]);
 	setTranslation(strs[2]);
 	setWordOnly(strs[3]=="0");
+}
+
+QString StatState::typeToString(StatState::Types type)
+{
+	switch (type) {
+	case None:
+	case NoOfTypes:
+		return QString();
+	case Errors: return "Errors";
+	case States: return "States";
+	case Speed: return "Speed";
+	case Age: return "Age";
+	}
+	return QString();
+}
+
+StatState::Types StatState::stringToType(QString str)
+{
+	if (str == "Errors") return Errors;
+	if (str == "States") return States;
+	if (str == "Speed") return Speed;
+	if (str == "Age") return Age;
+	return None;
+}
+
+StatState::StatState(StatState::Types type, AppState *app, QObject *parent) :
+	PageState(PageState::Statistic, parent), m_type(type)
+{
+	switch(m_type) {
+	case States: {
+		auto states = app->states();
+		m_series.clear();
+		auto n = new BarSerie(BarSerie::Serie() << BarSerie::Value(0, states[0]), this);
+		n->setColor(Qt::red);
+		auto t = new BarSerie(BarSerie::Serie() << BarSerie::Value(0, states[1]), this);
+		t->setColor(Qt::green);
+		auto r = new BarSerie(BarSerie::Serie() << BarSerie::Value(0, states[2]), this);
+		r->setColor(Qt::blue);
+		m_series.addSerie(n);
+		m_series.addSerie(t);
+		m_series.addSerie(r);
+		m_series.setChecks(QVector<double>() << 0);
+		m_series.adjust();
+		m_series.setMinimum(0);
+		m_series.setGraphType(BarSeries::Bars);
+		break;
+	}
+	case Errors:
+		fillGraph(app, "errors");
+		break;
+	case Speed: {
+		fillGraph(app, "speed");
+		break;
+	}
+	case Age: {
+		fillGraph(app, "age");
+		break;
+	}
+	case None:
+	case NoOfTypes:
+		break;
+	}
+}
+
+void StatState::fillGraph(AppState *app, QString stat)
+{
+	m_series.clear();
+	BarSerie::Serie graph;
+
+	auto res = app->stats(stat);
+	std::sort(res.begin(), res.end());
+
+	int index = 0;
+	for (auto v: res)
+		graph << BarSerie::Value(index++, v);
+
+//	double cWidth = (res.back() - res.front()) / GRAPH_CLUSTER_NUMBER;
+
+//	int count = 0;
+//	double start = res.front();
+//	for (auto v: res) {
+//		if (v <= start + cWidth) {
+//			++count;
+//		} else {
+//			graph << BarSeries::Value(start, count);
+//			count = 0;
+//			start += cWidth;
+//		}
+//	}
+	auto serie = new BarSerie(graph, this);
+	serie->setColor(Qt::red);
+	m_series.addSerie(serie);
+	m_series.adjust();
+	m_series.setGraphType(BarSeries::Graph);
+}
+
+QString StatState::dump() const
+{
+	return QString("%1 + %2").
+		arg(PageState::dump()).
+		arg(typeToString(type()));
+}
+
+QString StatState::store() const
+{
+	return PageState::store()+";"+
+		typeToString(type());
+}
+
+void StatState::load(QString ctx)
+{
+	QStringList strs = ctx.split(";");
+	if (strs.size() != 2) return;
+	PageState::load(strs[0]);
+	setType(stringToType(strs[1]));
+}
+
+StatState::Types StatState::type() const
+{
+	return m_type;
+}
+
+BarSeries *StatState::series()
+{
+	return &m_series;
+}
+
+void StatState::setType(StatState::Types type)
+{
+	if (m_type == type)
+		return;
+
+	m_type = type;
+	emit typeChanged(m_type);
 }

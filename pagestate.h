@@ -4,6 +4,9 @@
 #include <QObject>
 
 #include "word.h"
+#include "barseries.h"
+
+class AppState;
 
 class PageState : public QObject
 {
@@ -22,7 +25,9 @@ public:
 		Check,
 		Errors,
 		Train,
-		Repeat
+		Repeat,
+
+		Statistic
 	};
 	Q_ENUM(State)
 
@@ -112,6 +117,53 @@ public slots:
 private:
 	State m_otherState;
 	QString m_description;
+};
+
+class StatState : public PageState
+{
+	Q_OBJECT
+
+public:
+	enum Types {
+		None = 0,
+		Errors,
+		States,
+		Speed,
+		Age,
+
+		NoOfTypes
+	};
+	Q_ENUM(Types)
+
+	static QString typeToString(Types type);
+	static Types stringToType(QString str);
+
+	explicit StatState(QObject *parent = nullptr) : PageState(parent) {}
+	StatState(Types type, AppState *app, QObject *parent = nullptr);
+
+	Q_PROPERTY(Types type READ type WRITE setType NOTIFY typeChanged)
+	Q_PROPERTY(BarSeries* series READ series)
+
+	virtual QString dump() const override;
+	virtual QString store() const override;
+	virtual void load(QString ctx) override;
+
+	Types type() const;
+
+	BarSeries *series();
+
+public slots:
+	void setType(Types type);
+
+signals:
+	void typeChanged(Types type);
+
+private:
+	void fillGraph(AppState *app, QString stat);
+
+private:
+	Types m_type;
+	BarSeries m_series;
 };
 
 #endif // PAGESTATE_H

@@ -200,10 +200,22 @@ void AppState::next(Direction dir)
 		break;
 	case PageState::Menu:
 		setUpper(new PageState(PageState::Main));
-		setLower(new PageState(PageState::None));
+		setLower(new StatState(StatState::States, this));
 		setLeft(new PageState(PageState::None));
 		setRight(new PageState(PageState::None));
 		break;
+	case PageState::Statistic: {
+		setUpper(new PageState(PageState::Main));
+		setLower(new PageState(PageState::None));
+		auto type = static_cast<StatState*>(page())->type();
+		auto nextt = StatState::Types(type+1);
+		auto prevt = StatState::Types(type-1);
+		if (nextt == StatState::NoOfTypes) nextt = StatState::Types(StatState::None+1);
+		if (prevt == StatState::None) prevt = StatState::Types(StatState::NoOfTypes-1);
+		setLeft(new StatState(prevt, this));
+		setRight(new StatState(nextt, this));
+		break;
+	}
 	case PageState::Header: {
 		auto othState = static_cast<HeadState*>(page())->otherState();
 		setUpper(new PageState(PageState::Main));
@@ -326,6 +338,9 @@ void AppState::loadState(QVariantMap state)
 	case PageState::Header:
 	case PageState::Footer:
 		m_page = new HeadState();
+		break;
+	case PageState::Statistic:
+		m_page = new StatState();
 		break;
 	default:
 		m_page = new PageState();
@@ -657,6 +672,37 @@ QString AppState::dictionary() const
 	return m_dictionary;
 }
 
+bool learnPredicate(Word word) {
+	return word.repeats == 0;
+}
+
+bool trainPredicate(Word word) {
+	return word.repeats > 0 && word.age <= TrainThreshold;
+}
+
+bool repeatPredicate(Word word) {
+	return word.repeats > 0 && word.age > TrainThreshold;
+}
+
+QVector<int> AppState::states() const
+{
+	QVector<int> res(3, 0);
+	for (auto w: m_words) {
+		if (learnPredicate(w)) res[0] = res[0]+1;
+		if (trainPredicate(w)) res[1] = res[1]+1;
+		if (repeatPredicate(w)) res[2] = res[2]+1;
+	}
+	return res;
+}
+
+QVector<double> AppState::stats(QString stat) const
+{
+	QVector<double> res;
+	for (auto w: m_words)
+		res << w.store().value(stat).toDouble();
+	return res;
+}
+
 void AppState::setUpper(PageState *upper)
 {
 	if (m_upper) delete m_upper;
@@ -803,7 +849,7 @@ void AppState::newLearn()
 	QVector<int> candidates;
 	candidates.reserve(m_words.size());
 	for (int i = 0; i < m_words.size(); ++i) {
-		if (m_words[i].repeats == 0)
+		if (learnPredicate(m_words[i]))
 			candidates.append(i);
 	}
 	shuffle(candidates);
@@ -828,8 +874,7 @@ void AppState::newTrain()
 	QVector<T> candidates;
 	candidates.reserve(m_words.size());
 	for (int i = 0; i < m_words.size(); ++i) {
-		if (m_words[i].repeats > 0 && m_words[i].age <= TrainThreshold) {
-//			candidates.append(T(i, m_words[i].age));
+		if (trainPredicate(m_words[i])) {
 			int elapsed = int(m_words[i].last.secsTo(QDateTime::currentDateTime())) /
 				TrainElapsedRound;
 			candidates.append(T(i,m_words[i].age - elapsed*TrainElapsedCoeff));

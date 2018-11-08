@@ -4,6 +4,7 @@ import AppState 1.0
 import PageState 1.0
 import WordState 1.0
 import HeadState 1.0
+import StatState 1.0
 import Settings 1.0
 
 ApplicationWindow {
@@ -25,6 +26,7 @@ ApplicationWindow {
 	property Component wordFact: Qt.createComponent("WordForm.ui.qml")
 	property Component headFact: Qt.createComponent("HeaderForm.ui.qml")
 	property Component menuFact: Qt.createComponent("Menu.qml")
+	property Component statFact: Qt.createComponent("StatPage.qml")
 
 	function makePage(state){
 		var obj
@@ -45,6 +47,9 @@ ApplicationWindow {
 			break
 		case PageState.Menu:
 			obj = menuFact.createObject(flip, {"anchors.fill": flip, "visible": false, "db": db})
+			break
+		case PageState.Statistic:
+			obj = statFact.createObject(flip, {"anchors.fill": flip, "visible": false, "bars": state.series})
 			break
 		case PageState.None:
 			// fallthrough
@@ -107,6 +112,25 @@ ApplicationWindow {
 				break
 			}
 			break
+		case PageState.Statistic:
+			switch (state.type) {
+			case StatState.Errors:
+				page.headCap = qsTr("Errors")
+				break
+			case StatState.States:
+				page.headCap = qsTr("State")
+				break
+			case StatState.Speed:
+				page.headCap = qsTr("Speed")
+				break
+			case StatState.Age:
+				page.headCap = qsTr("Age")
+				break
+			default:
+				page.headCap = qsTr("UNEXPECTED! ")+state.type
+				break
+			}
+			break
 		default:
 			break
 		}
@@ -138,6 +162,7 @@ ApplicationWindow {
 		case PageState.Header:
 		case PageState.Learn:
 		case PageState.Errors:
+		case PageState.Statistic:
 			switch(dir) {
 			case AppState.Up: return "blue"
 			case AppState.Down: return "yellow"
