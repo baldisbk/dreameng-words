@@ -57,6 +57,8 @@ public:
 	Q_INVOKABLE void clearWords();
 	Q_INVOKABLE void addWord(QVariantMap word);
 	Q_INVOKABLE void loadState(QVariantMap state);
+	// for word edit
+	Q_INVOKABLE void setWord(int id, QVariantMap cts);
 
 	void addWord(QJsonObject doc, int id = -1);
 	void addWord(Word word, int id = -1);

@@ -14,6 +14,8 @@
         <file>SettingDialog.qml</file>
         <file>DictsDialog.qml</file>
         <file>OpenFileDialog.qml</file>
+        <file>WordEditDialog.qml</file>
+        <file>WordListDialog.qml</file>
     </qresource>
     <qresource prefix="/tr"/>
     <qresource prefix="/tc"/>

@@ -350,6 +350,15 @@ void AppState::loadState(QVariantMap state)
 	next(Nowhere);
 }
 
+void AppState::setWord(int id, QVariantMap cts)
+{
+	if (m_words.contains(id)) {
+		auto word = m_words.value(id);
+		word.load(cts);
+		m_words[id] = word;
+	}
+}
+
 void AppState::addWord(QJsonObject obj, int id)
 {
 	if (!obj.contains("w")) return;
