@@ -16,7 +16,8 @@ SOURCES += \
         main.cpp \
     appstate.cpp \
     settings.cpp \
-    pagestate.cpp
+    pagestate.cpp \
+    wordselectors.cpp
 
 RESOURCES += qml.qrc
 
@@ -37,7 +38,9 @@ HEADERS += \
     appstate.h \
     settings.h \
     pagestate.h \
-    word.h
+    word.h \
+    wordselectors.h \
+    constants.h
 
 DISTFILES += \
     sample.js \

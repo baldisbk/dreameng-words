@@ -9,6 +9,8 @@
 #include "pagestate.h"
 #include "word.h"
 
+class WordSelector;
+
 class AppState : public QObject
 {
 	Q_OBJECT
@@ -100,6 +102,7 @@ private:
 	static bool showWordOnState(PageState::State state);
 
 	// init modes
+	void newWordSerie(WordSelector* sel);
 	void newLearn();
 	void newTrain();
 	void newRepeat();

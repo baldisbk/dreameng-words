@@ -8,17 +8,10 @@
 
 #include <QDebug>
 
-//#define DEBUG_DO_DUMP
+#include "constants.h"
+#include "wordselectors.h"
 
-const int TrainThreshold = 7;		// "days" for Train mode become Repeat
-const double OldRepeatCoeff = 0.8;	// "forgetting" of repeats and errors num in Repeat mode
-const double TrainErrorRatio = 0.3;	// drop mode to Train if error rate is more
-const double TrainErrorCost = 1.0;	// age reducing coeff for error rate
-const double SecToAgeCoeff = 1.0/86400;	// second/"day"
-const double BadSpeedRatio = 2.0;	// if new speed if this times more, it's considered bad
-const double BadSpeedCost = 1.0;	// age reducing coeff for bad speed
-const int TrainElapsedRound = 3600;	// time from last repeat rounded
-const int TrainElapsedCoeff = 7;	// time from last repeat coeff
+//#define DEBUG_DO_DUMP
 
 QString listToString(QVector<int> list)
 {
@@ -667,25 +660,13 @@ QString AppState::dictionary() const
 	return m_dictionary;
 }
 
-bool learnPredicate(Word word) {
-	return word.repeats == 0;
-}
-
-bool trainPredicate(Word word) {
-	return word.repeats > 0 && word.age <= TrainThreshold;
-}
-
-bool repeatPredicate(Word word) {
-	return word.repeats > 0 && word.age > TrainThreshold;
-}
-
 QVector<int> AppState::states() const
 {
 	QVector<int> res(3, 0);
 	for (int i = 0; i < m_words.size(); ++i) {
-		if (learnPredicate(m_words[i])) res[0] = res[0]+1;
-		if (trainPredicate(m_words[i])) res[1] = res[1]+1;
-		if (repeatPredicate(m_words[i])) res[2] = res[2]+1;
+		if (LearnSelector().predicate(m_words[i])) res[0] = res[0]+1;
+		if (TrainSelector().predicate(m_words[i])) res[1] = res[1]+1;
+		if (RepeatSelector().predicate(m_words[i])) res[2] = res[2]+1;
 	}
 	return res;
 }
@@ -826,83 +807,34 @@ int rand(int size)
 	return QRandomGenerator::global()->bounded(size);
 }
 
-void AppState::newLearn()
+void AppState::newWordSerie(WordSelector *sel)
 {
-	qDebug() << "-- newLearn";
 	m_selectedWords.clear();
 	m_changedWords.clear();
 	m_errorWords.clear();
-	// select new words
-	QVector<int> candidates;
-	candidates.reserve(m_words.size());
-	for (int i = 0; i < m_words.size(); ++i) {
-		if (learnPredicate(m_words[i]))
-			candidates.append(i);
+	auto candidates = sel->candidates(m_words, m_settings.seqLength());
+	for (int i: candidates) {
+		m_selectedWords.append(i);
+		m_changedWords[i] = m_words[i];
 	}
-	shuffle(candidates);
-	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
-		int newId = candidates[i];
-		m_selectedWords.append(newId);
-		m_changedWords[newId] = m_words[newId];
-	}
-	// end select new words
 	m_currentWord = -1;
 	shuffle(m_selectedWords);
+	delete sel;
+}
+
+void AppState::newLearn()
+{
+	newWordSerie(new LearnSelector());
 }
 
 void AppState::newTrain()
 {
-	qDebug() << "-- newTrain";
-	m_selectedWords.clear();
-	m_changedWords.clear();
-	m_errorWords.clear();
-	// select words to train
-	typedef QPair<int, double> T;
-	QVector<T> candidates;
-	candidates.reserve(m_words.size());
-	for (int i = 0; i < m_words.size(); ++i) {
-		if (trainPredicate(m_words[i])) {
-			int elapsed = int(m_words[i].last.secsTo(QDateTime::currentDateTime())) /
-				TrainElapsedRound;
-			candidates.append(T(i,m_words[i].age - elapsed*TrainElapsedCoeff));
-		}
-	}
-	std::sort(candidates.begin(), candidates.end(),
-		  [](const T& a, const T& b){return a.second<b.second;});
-	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
-		int newId = candidates[i].first;
-		m_selectedWords.append(newId);
-		m_changedWords[newId] = m_words[newId];
-	}
-	// end select words to train
-	m_currentWord = -1;
-	shuffle(m_selectedWords);
+	newWordSerie(new TrainSelector());
 }
 
 void AppState::newRepeat()
 {
-	qDebug() << "-- newRepeat";
-	m_selectedWords.clear();
-	m_changedWords.clear();
-	m_errorWords.clear();
-	// select old words
-	typedef QPair<int, double> T;
-	QVector<T> candidates;
-	candidates.reserve(m_words.size());
-	for (int i = 0; i < m_words.size(); ++i) {
-		if (repeatPredicate(m_words[i]))
-			candidates.append(T(i, m_words[i].errorRate()));
-	}
-	std::sort(candidates.begin(), candidates.end(),
-		  [](const T& a, const T& b){return a.second>b.second;});
-	for (int i = 0; i < m_settings.seqLength() && i < candidates.size(); ++i) {
-		int newId = candidates[i].first;
-		m_selectedWords.append(newId);
-		m_changedWords[newId] = m_words[newId];
-	}
-	// end select old words
-	m_currentWord = -1;
-	shuffle(m_selectedWords);
+	newWordSerie(new RepeatSelector());
 }
 
 void AppState::newErrors()
