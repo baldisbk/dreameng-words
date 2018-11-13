@@ -14,6 +14,11 @@ Dialog {
 		anchors.fill: parent
 		delegate: Rectangle {
 			id: itemDelegate
+			property var wordIndex: wordList.wordList[index]
+			property var word: wordList.database.state.wordContents(wordIndex)
+			property var prio: wordList.database.state.wordPriority(wordIndex)
+			property int stat: wordList.database.state.wordState(wordIndex)
+			property string description
 			height: 100
 			radius: 10
 			border {
@@ -21,9 +26,10 @@ Dialog {
 				width: 3
 			}
 			width: parent.width
-			property var wordIndex: wordList.wordList[index]
-			property var word: wordList.database.state.wordContents(wordIndex)
-			onWordChanged: console.log(index, wordIndex, word.word)
+			color: (stat==1)?"green":(stat==2)?"red":(stat==4)?"blue":"gray"
+			onWordChanged: {
+				description = word.errors+"/"+word.repeats+" ("+prio+")"
+			}
 			Label{
 				id: wordHead
 				anchors {
@@ -45,7 +51,7 @@ Dialog {
 					left: parent.left
 					right: parent.right
 				}
-				text: itemDelegate.word.errors+"/"+itemDelegate.word.repeats
+				text: itemDelegate.description
 				font.pointSize: 15
 				horizontalAlignment: Text.AlignHCenter
 				verticalAlignment: Text.AlignVCenter

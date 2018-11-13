@@ -671,6 +671,28 @@ QVector<int> AppState::states() const
 	return res;
 }
 
+int AppState::wordState(int id) const
+{
+	if (!m_words.contains(id))
+		return 0;
+	Word word = m_words[id];
+	int res = 0;
+	if (LearnSelector().predicate(word)) res |= 1;
+	if (TrainSelector().predicate(word)) res |= 2;
+	if (RepeatSelector().predicate(word)) res |= 4;
+	return res;
+}
+
+double AppState::wordPriority(int id) const
+{
+	switch (wordState(id)) {
+	case 1: return LearnSelector().priority(m_words[id]);
+	case 2: return TrainSelector().priority(m_words[id]);
+	case 4: return RepeatSelector().priority(m_words[id]);
+	default: return 0;
+	}
+}
+
 void AppState::setUpper(PageState *upper)
 {
 	if (m_upper) delete m_upper;
