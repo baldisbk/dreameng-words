@@ -6,6 +6,7 @@ Dialog {
 	property string dict
 	property var dictList
 	property Database database
+	id: dicts
 	width: parent.width
 	height: parent.height
 	contentItem: ListView {
@@ -38,9 +39,9 @@ Dialog {
 				MouseArea {
 					anchors.fill: parent
 					onClicked: {
-						database.rmDict(dictionaries.dictList[index])
-						dictionaries.dictList = database.state.dictionaries()
-						dictView.model = dictionaries.dictList.length
+						database.rmDict(dicts.dictList[index])
+						dicts.dictList = database.state.dictionaries()
+						dictView.model = dicts.dictList.length
 					}
 				}
 			}
@@ -51,7 +52,7 @@ Dialog {
 					left: parent.left
 					right: dellabel.left
 				}
-				text: dictionaries.dictList[index]
+				text: dicts.dictList[index]
 				font.pointSize: 30
 				font.bold: true
 				horizontalAlignment: Text.AlignHCenter
@@ -59,8 +60,8 @@ Dialog {
 				MouseArea {
 					anchors.fill: parent
 					onClicked: {
-						dictionaries.dict = dictionaries.dictList[index]
-						dictionaries.accept()
+						dicts.dict = dicts.dictList[index]
+						dicts.accept()
 					}
 				}
 			}

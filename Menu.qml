@@ -19,6 +19,11 @@ Item {
 		database: db
 	}
 
+	WordListDialog{
+		id: words
+		database: db
+	}
+
 	Column {
 		property int childHeight: (height-spacing*(children.length-1))/children.length
 		spacing: 20
@@ -52,6 +57,12 @@ Item {
 			height: parent.childHeight
 			caption: qsTr("Settings")
 			onClicked: {settings.open()}
+		}
+		MenuButton {
+			width: parent.width
+			height: parent.childHeight
+			caption: qsTr("Words")
+			onClicked: {words.open()}
 		}
 	}
 }

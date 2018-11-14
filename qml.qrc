@@ -16,6 +16,8 @@
         <file>OpenFileDialog.qml</file>
         <file>StatPage.qml</file>
         <file>BarChart.qml</file>
+        <file>WordEditDialog.qml</file>
+        <file>WordListDialog.qml</file>
     </qresource>
     <qresource prefix="/tr"/>
     <qresource prefix="/tc"/>

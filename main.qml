@@ -37,16 +37,20 @@ ApplicationWindow {
 		case PageState.Train:
 		case PageState.Repeat:
 			obj = wordFact.createObject(flip, {"anchors.fill": flip, "visible": false})
+			console.log(wordFact.errorString())
 			break
 		case PageState.Header:
 		case PageState.Footer:
 			obj = headFact.createObject(flip, {"anchors.fill": flip, "visible": false})
+			console.log(headFact.errorString())
 			break
 		case PageState.Main:
 			obj = mainFact.createObject(flip, {"anchors.fill": flip, "visible": false})
+			console.log(mainFact.errorString())
 			break
 		case PageState.Menu:
 			obj = menuFact.createObject(flip, {"anchors.fill": flip, "visible": false, "db": db})
+			console.log(menuFact.errorString())
 			break
 		case PageState.Statistic:
 			obj = statFact.createObject(flip, {"anchors.fill": flip, "visible": false, "bars": state.series})

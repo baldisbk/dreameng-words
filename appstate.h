@@ -9,6 +9,8 @@
 #include "pagestate.h"
 #include "word.h"
 
+class WordSelector;
+
 class AppState : public QObject
 {
 	Q_OBJECT
@@ -57,6 +59,10 @@ public:
 	Q_INVOKABLE void clearWords();
 	Q_INVOKABLE void addWord(QVariantMap word);
 	Q_INVOKABLE void loadState(QVariantMap state);
+	// for word edit
+	Q_INVOKABLE void setWord(int id, QVariantMap cts);
+	Q_INVOKABLE int wordState(int id) const;
+	Q_INVOKABLE double wordPriority(int id) const;
 
 	void addWord(QJsonObject doc, int id = -1);
 	void addWord(Word word, int id = -1);
@@ -99,6 +105,7 @@ private:
 	static bool showWordOnState(PageState::State state);
 
 	// init modes
+	void newWordSerie(WordSelector* sel);
 	void newLearn();
 	void newTrain();
 	void newRepeat();

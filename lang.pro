@@ -17,7 +17,8 @@ SOURCES += \
     appstate.cpp \
     settings.cpp \
     pagestate.cpp \
-    barseries.cpp
+    barseries.cpp \
+    wordselectors.cpp
 
 RESOURCES += qml.qrc
 
@@ -39,7 +40,9 @@ HEADERS += \
     settings.h \
     pagestate.h \
     word.h \
-    barseries.h
+    barseries.h \
+    wordselectors.h \
+    constants.h
 
 DISTFILES += \
     sample.js \
