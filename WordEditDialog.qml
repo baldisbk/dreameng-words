@@ -17,6 +17,7 @@ Dialog {
 			id: itemDelegate
 			property string pName: dialog.wordFields[index]
 			property string pValue: wordContents[pName]
+			onPValueChanged: wordContents[pName] = pValue
 			height: 100
 			radius: 10
 			border {
@@ -51,16 +52,17 @@ Dialog {
 					left: propName.right
 				}
 			}
-			Label {
+			TextField {
 				id: propValue
 				anchors {
 					bottom: parent.bottom
 					top: parent.top
 					right: parent.right
 					left: middleLine.right
+					margins: parent.border.width*3
 				}
-				width: parent.width / 2 - parent.border.width
 				text: parent.pValue
+				onTextChanged: parent.pValue = text
 				font.pointSize: 15
 				font.bold: true
 				horizontalAlignment: Text.AlignHCenter
@@ -71,9 +73,6 @@ Dialog {
 	onVisibleChanged: {
 		if (visible) wordView.model = wordFields.length
 		else wordView.model = 0
-
 	}
-	onAccepted: {
-		database.state.setWord(wordId, wordContents)
-	}
+	onAccepted: database.state.setWord(wordId, wordContents)
 }
