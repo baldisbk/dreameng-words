@@ -11,7 +11,7 @@ Dialog {
 	height: parent.height
 	contentItem: ListView {
 		id: wordView
-		anchors.fill: parent
+		//anchors.fill: parent
 		delegate: Rectangle {
 			id: itemDelegate
 			property var wordIndex: wordList.wordList[index]
@@ -59,14 +59,17 @@ Dialog {
 			MouseArea {
 				anchors.fill: parent
 				onClicked: {
-				//	editDialog.
+					editDialog.wordId = wordIndex
+					editDialog.wordContents = word
+					editDialog.open()
 				}
 			}
 		}
 	}
-//	WordEditDialog {
-//		id: editDialog
-//	}
+	WordEditDialog {
+		id: editDialog
+		database: wordList.database
+	}
 
 	onVisibleChanged: {
 		if (visible) {
