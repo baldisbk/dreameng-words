@@ -765,8 +765,9 @@ void AppState::flipWord(bool modify, bool ok)
 	}
 	int newspeed = w.speed + (m_lastElapsed-w.speed)/(w.repeats/2+1);
 	w.lastspeed = m_lastElapsed;
+	double since = w.repeats==0 ? 0 :
+		double(w.last.secsTo(QDateTime().currentDateTime()))*SecToAgeCoeff;
 	++w.repeats;
-	double since = double(w.last.secsTo(QDateTime().currentDateTime()))*SecToAgeCoeff;
 	w.last = QDateTime().currentDateTime();
 	if (!ok) {
 		++w.errors;
