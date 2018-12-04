@@ -781,7 +781,7 @@ void AppState::flipWord(bool modify, bool ok)
 	if (w.age > TrainThreshold && (w.errorRate() > TrainErrorRatio)) {
 		w.age = 0;
 	} else if (since > 0) {
-		w.age += since;
+		w.age += (since < MaxAgeIncrease)?since:MaxAgeIncrease;
 	}
 	w.speed = newspeed;
 	m_changedWords[index] = w;
