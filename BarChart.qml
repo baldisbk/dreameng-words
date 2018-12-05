@@ -2,29 +2,43 @@ import QtQuick 2.0
 import BarSeries 1.0
 
 Canvas {
-	property int frameWidth: (height>width)?(width/10):(height/10)
+	property int screenSize: (height>width)?width:height
+	property int frameWidth: screenSize/10
 	property double gapPercent: 0.2
+	property int fontSize: screenSize/40
+	property double fontAdd: screenSize/80
+	property double lineWidth: screenSize/100
 	property BarSeries bars
+	function format(num) {return num}
 	onPaint: {
 		var ctx = getContext("2d");
 		ctx.strokeStyle = "black"
-		ctx.lineWidth = 1
+		ctx.lineWidth = lineWidth
+		ctx.font = fontSize+"px sans-serif"
 
 		ctx.beginPath()
 		ctx.moveTo(frameWidth, frameWidth)
 		ctx.lineTo(frameWidth, height - frameWidth)
 		ctx.lineTo(width - frameWidth, height - frameWidth)
-
-		var fh = 10 // font height
-		var fw = 5 // width add
-
-		ctx.text(bars.maximum, frameWidth - ctx.measureText(bars.maximum).width - fw, frameWidth + fh)
-		ctx.text(bars.minimum, frameWidth - ctx.measureText(bars.minimum).width - fw, height - frameWidth)
-
-		ctx.text(bars.start, frameWidth, height - frameWidth + fh)
-		ctx.text(bars.finish, width - frameWidth - ctx.measureText(bars.finish).width, height - frameWidth + fh)
 		ctx.stroke()
+		ctx.closePath()
 
+		ctx.lineWidth = 1
+		ctx.beginPath()
+		ctx.text(format(bars.maximum),
+			 frameWidth - ctx.measureText(bars.maximum).width - fontAdd,
+			 frameWidth + fontSize)
+		ctx.text(format(bars.minimum),
+			 frameWidth - ctx.measureText(bars.minimum).width - fontAdd,
+			 height - frameWidth)
+
+		ctx.text(format(bars.start),
+			 frameWidth,
+			 height - frameWidth + fontSize + fontAdd)
+		ctx.text(format(bars.finish),
+			 width - frameWidth - ctx.measureText(bars.finish).width,
+			 height - frameWidth + fontSize + fontAdd)
+		ctx.stroke()
 		ctx.closePath()
 
 		switch (bars.graphType) {
@@ -75,6 +89,8 @@ Canvas {
 		var vCoeff = visW/totalW
 
 		if (serieNum == 0) return
+
+		ctx.lineWidth = lineWidth
 
 		for (var j=0; j<serieNum; ++j) {
 			var first = true
