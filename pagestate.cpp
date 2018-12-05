@@ -252,12 +252,15 @@ void StatState::fillGraph(AppState *app, QString stat)
 
 	int index = 0;
 	int sIndex = 0;
+	double last = 0;
 	for (auto v: res) {
 		if (sIndex++ == 0) continue;
 		std::sort(v.begin(), v.end());
 		BarSerie::Serie graph;
+		if (index != 0)
+			graph << BarSerie::Value(index-1, last);
 		for (auto vv: v)
-			graph << BarSerie::Value(index++, vv);
+			graph << BarSerie::Value(index++, last = vv);
 		auto serie = new BarSerie(graph, this);
 		switch (sIndex) {
 		case 1: serie->setColor(Qt::red); break;
