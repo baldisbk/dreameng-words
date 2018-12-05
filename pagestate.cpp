@@ -192,6 +192,7 @@ QString StatState::typeToString(StatState::Types type)
 	case States: return "States";
 	case Speed: return "Speed";
 	case Age: return "Age";
+	case LastRepeat: return "LastRepeat";
 	}
 	return QString();
 }
@@ -202,6 +203,7 @@ StatState::Types StatState::stringToType(QString str)
 	if (str == "States") return States;
 	if (str == "Speed") return Speed;
 	if (str == "Age") return Age;
+	if (str == "LastRepeat") return LastRepeat;
 	return None;
 }
 
@@ -230,14 +232,15 @@ StatState::StatState(StatState::Types type, AppState *app, QObject *parent) :
 	case Errors:
 		fillGraph(app, "errors");
 		break;
-	case Speed: {
+	case Speed:
 		fillGraph(app, "speed");
 		break;
-	}
-	case Age: {
+	case Age:
 		fillGraph(app, "age");
 		break;
-	}
+	case LastRepeat:
+		fillGraph(app, "lastrepeat");
+		break;
 	case None:
 	case NoOfTypes:
 		break;
@@ -247,14 +250,28 @@ StatState::StatState(StatState::Types type, AppState *app, QObject *parent) :
 void StatState::fillGraph(AppState *app, QString stat)
 {
 	m_series.clear();
-	BarSerie::Serie graph;
 
 	auto res = app->stats(stat);
-	std::sort(res.begin(), res.end());
 
 	int index = 0;
-	for (auto v: res)
-		graph << BarSerie::Value(index++, v);
+	int sIndex = 0;
+	double last = 0;
+	for (auto v: res) {
+		if (sIndex++ == 0) continue;
+		std::sort(v.begin(), v.end());
+		BarSerie::Serie graph;
+		if (index != 0)
+			graph << BarSerie::Value(index-1, last);
+		for (auto vv: v)
+			graph << BarSerie::Value(index++, last = vv);
+		auto serie = new BarSerie(graph, this);
+		switch (sIndex) {
+		case 1: serie->setColor(Qt::red); break;
+		case 2: serie->setColor(Qt::green); break;
+		case 3: serie->setColor(Qt::blue); break;
+		}
+		m_series.addSerie(serie);
+	}
 
 //	double cWidth = (res.back() - res.front()) / GRAPH_CLUSTER_NUMBER;
 
@@ -269,9 +286,6 @@ void StatState::fillGraph(AppState *app, QString stat)
 //			start += cWidth;
 //		}
 //	}
-	auto serie = new BarSerie(graph, this);
-	serie->setColor(Qt::red);
-	m_series.addSerie(serie);
 	m_series.adjust();
 	m_series.setGraphType(BarSeries::Graph);
 }

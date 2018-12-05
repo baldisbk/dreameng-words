@@ -130,6 +130,7 @@ public:
 		States,
 		Speed,
 		Age,
+		LastRepeat,
 
 		NoOfTypes
 	};

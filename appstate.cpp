@@ -684,12 +684,22 @@ QVector<int> AppState::states() const
 	return res;
 }
 
-QVector<double> AppState::stats(QString stat) const
+QVector<AppState::Values> AppState::stats(QString stat) const
 {
-	QVector<double> res;
-	for (auto w: m_words)
-		res << w.store().value(stat).toDouble();
-	return res;
+	Values resL, resT, resR;
+	for (auto w: m_words) {
+		double val = 0;
+		if (Word::keys().contains(stat)) {
+			val = w.store().value(stat).toDouble();
+		} else {
+			if (stat == "lastrepeat")
+				val = double(w.last.secsTo(QDateTime::currentDateTime()))/3600;
+		}
+		if (LearnSelector().predicate(w)) resL << val;
+		if (TrainSelector().predicate(w)) resT << val;
+		if (RepeatSelector().predicate(w)) resR << val;
+	}
+	return QVector<Values>() << resL << resT << resR;
 }
 
 int AppState::wordState(int id) const

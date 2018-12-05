@@ -130,6 +130,9 @@ ApplicationWindow {
 			case StatState.Age:
 				page.headCap = qsTr("Age")
 				break
+			case StatState.LastRepeat:
+				page.headCap = qsTr("Last repeat")
+				break
 			default:
 				page.headCap = qsTr("UNEXPECTED! ")+state.type
 				break
