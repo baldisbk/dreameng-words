@@ -247,14 +247,25 @@ StatState::StatState(StatState::Types type, AppState *app, QObject *parent) :
 void StatState::fillGraph(AppState *app, QString stat)
 {
 	m_series.clear();
-	BarSerie::Serie graph;
 
 	auto res = app->stats(stat);
-	std::sort(res.begin(), res.end());
 
 	int index = 0;
-	for (auto v: res)
-		graph << BarSerie::Value(index++, v);
+	int sIndex = 0;
+	for (auto v: res) {
+		if (sIndex++ == 0) continue;
+		std::sort(v.begin(), v.end());
+		BarSerie::Serie graph;
+		for (auto vv: v)
+			graph << BarSerie::Value(index++, vv);
+		auto serie = new BarSerie(graph, this);
+		switch (sIndex) {
+		case 1: serie->setColor(Qt::red); break;
+		case 2: serie->setColor(Qt::green); break;
+		case 3: serie->setColor(Qt::blue); break;
+		}
+		m_series.addSerie(serie);
+	}
 
 //	double cWidth = (res.back() - res.front()) / GRAPH_CLUSTER_NUMBER;
 
@@ -269,9 +280,6 @@ void StatState::fillGraph(AppState *app, QString stat)
 //			start += cWidth;
 //		}
 //	}
-	auto serie = new BarSerie(graph, this);
-	serie->setColor(Qt::red);
-	m_series.addSerie(serie);
 	m_series.adjust();
 	m_series.setGraphType(BarSeries::Graph);
 }

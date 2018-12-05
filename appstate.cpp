@@ -696,12 +696,16 @@ QVector<int> AppState::states() const
 	return res;
 }
 
-QVector<double> AppState::stats(QString stat) const
+QVector<AppState::Values> AppState::stats(QString stat) const
 {
-	QVector<double> res;
-	for (auto w: m_words)
-		res << w.store().value(stat).toDouble();
-	return res;
+	Values resL, resT, resR;
+	for (auto w: m_words) {
+		auto val = w.store().value(stat).toDouble();
+		if (learnPredicate(w)) resL << val;
+		if (trainPredicate(w)) resT << val;
+		if (repeatPredicate(w)) resR << val;
+	}
+	return QVector<Values>() << resL << resT << resR;
 }
 
 void AppState::setUpper(PageState *upper)
