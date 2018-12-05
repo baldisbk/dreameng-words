@@ -9,7 +9,7 @@ Canvas {
 	property double fontAdd: screenSize/80
 	property double lineWidth: screenSize/100
 	property BarSeries bars
-	function format(num) {return num}
+	function format(num) {return Number(num).toFixed(2)}
 	onPaint: {
 		var ctx = getContext("2d");
 		ctx.strokeStyle = "black"
@@ -26,17 +26,17 @@ Canvas {
 		ctx.lineWidth = 1
 		ctx.beginPath()
 		ctx.text(format(bars.maximum),
-			 frameWidth - ctx.measureText(bars.maximum).width - fontAdd,
+			 frameWidth - ctx.measureText(format(bars.maximum)).width - fontAdd,
 			 frameWidth + fontSize)
 		ctx.text(format(bars.minimum),
-			 frameWidth - ctx.measureText(bars.minimum).width - fontAdd,
+			 frameWidth - ctx.measureText(format(bars.minimum)).width - fontAdd,
 			 height - frameWidth)
 
 		ctx.text(format(bars.start),
 			 frameWidth,
 			 height - frameWidth + fontSize + fontAdd)
 		ctx.text(format(bars.finish),
-			 width - frameWidth - ctx.measureText(bars.finish).width,
+			 width - frameWidth - ctx.measureText(format(bars.finish)).width,
 			 height - frameWidth + fontSize + fontAdd)
 		ctx.stroke()
 		ctx.closePath()
