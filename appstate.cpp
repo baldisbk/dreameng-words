@@ -700,7 +700,13 @@ QVector<AppState::Values> AppState::stats(QString stat) const
 {
 	Values resL, resT, resR;
 	for (auto w: m_words) {
-		auto val = w.store().value(stat).toDouble();
+		double val = 0;
+		if (Word::keys().contains(stat)) {
+			val = w.store().value(stat).toDouble();
+		} else {
+			if (stat == "lastrepeat")
+				val = double(w.last.secsTo(QDateTime::currentDateTime()))/3600;
+		}
 		if (learnPredicate(w)) resL << val;
 		if (trainPredicate(w)) resT << val;
 		if (repeatPredicate(w)) resR << val;

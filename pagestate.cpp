@@ -192,6 +192,7 @@ QString StatState::typeToString(StatState::Types type)
 	case States: return "States";
 	case Speed: return "Speed";
 	case Age: return "Age";
+	case LastRepeat: return "LastRepeat";
 	}
 	return QString();
 }
@@ -202,6 +203,7 @@ StatState::Types StatState::stringToType(QString str)
 	if (str == "States") return States;
 	if (str == "Speed") return Speed;
 	if (str == "Age") return Age;
+	if (str == "LastRepeat") return LastRepeat;
 	return None;
 }
 
@@ -230,14 +232,15 @@ StatState::StatState(StatState::Types type, AppState *app, QObject *parent) :
 	case Errors:
 		fillGraph(app, "errors");
 		break;
-	case Speed: {
+	case Speed:
 		fillGraph(app, "speed");
 		break;
-	}
-	case Age: {
+	case Age:
 		fillGraph(app, "age");
 		break;
-	}
+	case LastRepeat:
+		fillGraph(app, "lastrepeat");
+		break;
 	case None:
 	case NoOfTypes:
 		break;
