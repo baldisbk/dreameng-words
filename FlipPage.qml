@@ -19,11 +19,13 @@ Item {
 	property color upperColor: "blue"
 	property color lowerColor: "yellow"
 
+	property int pageSize: (width>height) ? height : width
+
 	// look&feel
 	property int flipDuration: 100		// autoflip duration in ms
 	property int maxFlipAngle: 90		// flip that much for side-to-side drag
 	property int maxBlockAngle: 40		// flip that much only to show flip block
-	property int minSwipeLength: 20		// pixels to drag to start flip
+	property int minSwipeLength: pageSize/20// pixels to drag to start flip
 	property int maxBackoffAngle: 30	// flip back if angle is less
 
 	property int dir: AppState.Nowhere
@@ -148,11 +150,11 @@ Item {
 			if (axis>0) {
 				if ((diffY > 0 && noLower) || (diffY < 0 && noUpper))
 					maxfraq = maxBlockAngle
-				fraq = maxfraq*diffY/height
+				fraq = maxfraq*diffY/pageSize
 			}else{
 				if ((diffX > 0 && noRighter) || (diffX < 0 && noLefter))
 					maxfraq = maxBlockAngle
-				fraq = -maxfraq*diffX/width
+				fraq = -maxfraq*diffX/pageSize
 			}
 			rotation.axis.x = (axis>0)?1:0
 			rotation.axis.y = (axis<0)?1:0
