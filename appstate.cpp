@@ -518,7 +518,7 @@ QString AppState::populateSteal(QString filename)
 				word += ch;
 				continue;
 			} else {
-				if (word == "course_name") {
+				if (word == "app_learn_name") {
 					expectDict = true;
 				}
 				word = "";
