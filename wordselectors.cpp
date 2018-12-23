@@ -40,7 +40,6 @@ double TrainSelector::priority(Word word) const
 {
 	int elapsed = int(word.last.secsTo(QDateTime::currentDateTime())) / TrainElapsedRound;
 	return word.age - elapsed * TrainElapsedCoeff;
-
 }
 
 bool RepeatSelector::predicate(Word word) const
@@ -50,5 +49,5 @@ bool RepeatSelector::predicate(Word word) const
 
 double RepeatSelector::priority(Word word) const
 {
-	return -word.errorRate();
+	return word.last.toSecsSinceEpoch();
 }
