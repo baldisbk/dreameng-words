@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include "buildstats.gh"
+
 #include <QDebug>
 
 #include "constants.h"
@@ -722,6 +724,11 @@ double AppState::wordPriority(int id) const
 	case 4: return RepeatSelector().priority(m_words[id]);
 	default: return 0;
 	}
+}
+
+QString AppState::versionInfo() const
+{
+	return QString("Ver. %1, build at %2").arg(BUILD_TAG).arg(BUILD_DATE);
 }
 
 void AppState::setUpper(PageState *upper)

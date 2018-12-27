@@ -35,6 +35,7 @@ public:
 	Q_PROPERTY(QString dictionary READ dictionary WRITE setDictionary NOTIFY dictionaryChanged)
 
 	Q_PROPERTY(Settings* settings READ settings CONSTANT)
+	Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
 
 	// navigate
 	Q_INVOKABLE void next(Direction dir);
@@ -81,6 +82,8 @@ public:
 
 	typedef QVector<double> Values;
 	QVector<Values> stats(QString stat) const;
+
+	QString versionInfo() const;
 
 public slots:
 	void setUpper(PageState *upper);
